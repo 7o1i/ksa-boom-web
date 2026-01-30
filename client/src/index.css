@@ -24,8 +24,8 @@
   --color-card-foreground: oklch(0.95 0.01 270);
   --color-popover: oklch(0.12 0.02 270);
   --color-popover-foreground: oklch(0.95 0.01 270);
-  --color-primary: oklch(0.7 0.25 330);
-  --color-primary-foreground: oklch(0.98 0.01 270);
+  --color-primary: oklch(0.78 0.16 85);
+  --color-primary-foreground: oklch(0.15 0.02 85);
   --color-secondary: oklch(0.65 0.2 195);
   --color-secondary-foreground: oklch(0.08 0.02 270);
   --color-muted: oklch(0.2 0.02 270);
@@ -34,10 +34,10 @@
   --color-accent-foreground: oklch(0.08 0.02 270);
   --color-destructive: oklch(0.6 0.25 25);
   --color-destructive-foreground: oklch(0.98 0.01 270);
-  --color-border: oklch(0.3 0.1 330);
+  --color-border: oklch(0.35 0.1 85);
   --color-input: oklch(0.2 0.02 270);
-  --color-ring: oklch(0.7 0.25 330);
-  --color-chart-1: oklch(0.7 0.25 330);
+  --color-ring: oklch(0.78 0.16 85);
+  --color-chart-1: oklch(0.78 0.16 85);
   --color-chart-2: oklch(0.65 0.2 195);
   --color-chart-3: oklch(0.75 0.2 85);
   --color-chart-4: oklch(0.7 0.2 145);
@@ -48,15 +48,15 @@
   --radius-xl: 0.75rem;
   --color-sidebar: oklch(0.1 0.02 270);
   --color-sidebar-foreground: oklch(0.95 0.01 270);
-  --color-sidebar-primary: oklch(0.7 0.25 330);
-  --color-sidebar-primary-foreground: oklch(0.98 0.01 270);
-  --color-sidebar-accent: oklch(0.2 0.05 330);
+  --color-sidebar-primary: oklch(0.78 0.16 85);
+  --color-sidebar-primary-foreground: oklch(0.15 0.02 85);
+  --color-sidebar-accent: oklch(0.2 0.05 85);
   --color-sidebar-accent-foreground: oklch(0.95 0.01 270);
-  --color-sidebar-border: oklch(0.25 0.08 330);
-  --color-sidebar-ring: oklch(0.7 0.25 330);
+  --color-sidebar-border: oklch(0.3 0.08 85);
+  --color-sidebar-ring: oklch(0.78 0.16 85);
   
-  /* Cyberpunk neon colors */
-  --color-neon-pink: oklch(0.7 0.28 330);
+  /* Cyberpunk neon colors - Gold replaces Pink */
+  --color-neon-gold: oklch(0.82 0.18 85);
   --color-neon-cyan: oklch(0.75 0.18 195);
   --color-neon-purple: oklch(0.6 0.25 300);
   --color-neon-green: oklch(0.8 0.25 145);
@@ -134,14 +134,15 @@
     }
   }
   
-  /* Neon glow effects */
-  .neon-text-pink {
-    color: var(--color-neon-pink);
+  /* Neon glow effects - Gold (replacing pink) */
+  .neon-text-pink,
+  .neon-text-gold {
+    color: var(--color-neon-gold);
     text-shadow: 
-      0 0 5px var(--color-neon-pink),
-      0 0 10px var(--color-neon-pink),
-      0 0 20px var(--color-neon-pink),
-      0 0 40px var(--color-neon-pink);
+      0 0 5px var(--color-neon-gold),
+      0 0 10px var(--color-neon-gold),
+      0 0 20px var(--color-neon-gold),
+      0 0 40px var(--color-neon-gold);
   }
   
   .neon-text-cyan {
@@ -162,12 +163,13 @@
       0 0 40px var(--color-neon-purple);
   }
   
-  .neon-border-pink {
-    border-color: var(--color-neon-pink);
+  .neon-border-pink,
+  .neon-border-gold {
+    border-color: var(--color-neon-gold);
     box-shadow: 
-      0 0 5px var(--color-neon-pink),
-      0 0 10px var(--color-neon-pink),
-      inset 0 0 5px rgba(255, 0, 128, 0.1);
+      0 0 5px var(--color-neon-gold),
+      0 0 10px var(--color-neon-gold),
+      inset 0 0 5px rgba(255, 200, 50, 0.1);
   }
   
   .neon-border-cyan {
@@ -178,11 +180,12 @@
       inset 0 0 5px rgba(0, 255, 255, 0.1);
   }
   
-  .neon-glow-pink {
+  .neon-glow-pink,
+  .neon-glow-gold {
     box-shadow: 
-      0 0 10px var(--color-neon-pink),
-      0 0 20px var(--color-neon-pink),
-      0 0 40px var(--color-neon-pink);
+      0 0 10px var(--color-neon-gold),
+      0 0 20px var(--color-neon-gold),
+      0 0 40px var(--color-neon-gold);
   }
   
   .neon-glow-cyan {
@@ -221,8 +224,10 @@
   }
   
   .hud-bracket-pink::before,
-  .hud-bracket-pink::after {
-    border-color: var(--color-neon-pink);
+  .hud-bracket-pink::after,
+  .hud-bracket-gold::before,
+  .hud-bracket-gold::after {
+    border-color: var(--color-neon-gold);
   }
   
   /* Scanline effect */
@@ -256,7 +261,7 @@
     background-size: 50px 50px;
   }
   
-  /* Animated gradient border */
+  /* Animated gradient border - Gold and Cyan */
   .gradient-border {
     position: relative;
     background: var(--color-card);
@@ -266,7 +271,7 @@
     content: '';
     position: absolute;
     inset: -2px;
-    background: linear-gradient(45deg, var(--color-neon-pink), var(--color-neon-cyan), var(--color-neon-pink));
+    background: linear-gradient(45deg, var(--color-neon-gold), var(--color-neon-cyan), var(--color-neon-gold));
     background-size: 200% 200%;
     animation: gradient-shift 3s ease infinite;
     z-index: -1;

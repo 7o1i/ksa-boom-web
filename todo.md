@@ -57,3 +57,10 @@
 - [x] Add translations to security monitoring page (partial - key UI elements)
 - [x] Add translations to settings page (partial - key UI elements)
 - [x] Persist language preference in localStorage
+
+## Color Scheme Update (Pink to Gold)
+- [x] Update CSS variables for primary color from pink to gold
+- [x] Update neon glow effects from pink to gold
+- [x] Update neon text effects from pink to gold
+- [x] Update border effects from pink to gold
+- [x] Verify all components use the updated color scheme
