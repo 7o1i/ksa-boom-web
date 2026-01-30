@@ -3,11 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { trpc } from "@/lib/trpc";
 import { Key, Download, Shield, Activity, AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = trpc.dashboard.stats.useQuery();
   const { data: recentActivations } = trpc.license.recentActivations.useQuery({ limit: 5 });
   const { data: securityEvents } = trpc.security.events.useQuery({ limit: 5, unresolvedOnly: true });
+  const { t } = useLanguage();
 
   return (
     <AdminLayout>
@@ -16,12 +18,12 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold tracking-wider">
-              <span className="neon-text-cyan">CONTROL</span>
+              <span className="neon-text-cyan">{t('dashboard.title').split(' // ')[0] || 'CONTROL'}</span>
               <span className="text-muted-foreground"> // </span>
-              <span className="text-foreground">PANEL</span>
+              <span className="text-foreground">{t('dashboard.title').split(' // ')[1] || 'PANEL'}</span>
             </h1>
             <p className="text-muted-foreground mt-1">
-              System overview and monitoring
+              {t('dashboard.subtitle')}
             </p>
           </div>
         </div>
@@ -29,35 +31,35 @@ export default function AdminDashboard() {
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Total Licenses"
+            title={t('dashboard.totalLicenses')}
             value={stats?.licenses.total}
             icon={<Key className="h-5 w-5" />}
-            description={`${stats?.licenses.active || 0} active`}
+            description={`${stats?.licenses.active || 0} ${t('dashboard.active').toLowerCase()}`}
             isLoading={isLoading}
             accent="pink"
           />
           <StatsCard
-            title="Downloads"
+            title={t('dashboard.downloads')}
             value={stats?.downloads.total}
             icon={<Download className="h-5 w-5" />}
-            description={`${stats?.downloads.today || 0} today`}
+            description={`${stats?.downloads.today || 0} ${t('dashboard.today')}`}
             isLoading={isLoading}
             accent="cyan"
           />
           <StatsCard
-            title="Security Events"
+            title={t('dashboard.securityEvents')}
             value={stats?.security.unresolved}
             icon={<Shield className="h-5 w-5" />}
-            description={`${stats?.security.critical || 0} critical`}
+            description={`${stats?.security.critical || 0} ${t('dashboard.critical')}`}
             isLoading={isLoading}
             accent="pink"
             alert={stats?.security.critical ? stats.security.critical > 0 : false}
           />
           <StatsCard
-            title="Last 24h Events"
+            title={t('dashboard.last24hEvents')}
             value={stats?.security.last24h}
             icon={<Activity className="h-5 w-5" />}
-            description="Security events"
+            description={t('dashboard.securityEventsLabel')}
             isLoading={isLoading}
             accent="cyan"
           />
@@ -66,25 +68,25 @@ export default function AdminDashboard() {
         {/* License Status Overview */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MiniStatCard
-            label="Active"
+            label={t('dashboard.active')}
             value={stats?.licenses.active || 0}
             icon={<CheckCircle className="h-4 w-4 text-green-500" />}
             isLoading={isLoading}
           />
           <MiniStatCard
-            label="Pending"
+            label={t('dashboard.pending')}
             value={stats?.licenses.pending || 0}
             icon={<Clock className="h-4 w-4 text-yellow-500" />}
             isLoading={isLoading}
           />
           <MiniStatCard
-            label="Expired"
+            label={t('dashboard.expired')}
             value={stats?.licenses.expired || 0}
             icon={<AlertTriangle className="h-4 w-4 text-orange-500" />}
             isLoading={isLoading}
           />
           <MiniStatCard
-            label="Revoked"
+            label={t('dashboard.revoked')}
             value={stats?.licenses.revoked || 0}
             icon={<Shield className="h-4 w-4 text-red-500" />}
             isLoading={isLoading}
@@ -98,9 +100,9 @@ export default function AdminDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-secondary" />
-                <CardTitle className="font-display text-lg">Recent Activations</CardTitle>
+                <CardTitle className="font-display text-lg">{t('dashboard.recentActivations')}</CardTitle>
               </div>
-              <CardDescription>Latest license activation attempts</CardDescription>
+              <CardDescription>{t('dashboard.recentActivationsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
                       <div className={`w-2 h-2 rounded-full ${activation.success ? 'bg-green-500' : 'bg-red-500'}`} />
                       <div>
                         <p className="text-sm font-medium">
-                          {activation.machineName || 'Unknown Device'}
+                          {activation.machineName || t('dashboard.unknownDevice')}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {activation.ipAddress}
@@ -122,7 +124,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-right">
                       <p className={`text-xs font-medium ${activation.success ? 'text-green-500' : 'text-red-500'}`}>
-                        {activation.success ? 'Success' : 'Failed'}
+                        {activation.success ? t('dashboard.success') : t('dashboard.failed')}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(activation.createdAt).toLocaleTimeString()}
@@ -132,7 +134,7 @@ export default function AdminDashboard() {
                 ))}
                 {(!recentActivations || recentActivations.length === 0) && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No recent activations
+                    {t('dashboard.noRecentActivations')}
                   </p>
                 )}
               </div>
@@ -144,9 +146,9 @@ export default function AdminDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                <CardTitle className="font-display text-lg">Security Alerts</CardTitle>
+                <CardTitle className="font-display text-lg">{t('dashboard.securityAlerts')}</CardTitle>
               </div>
-              <CardDescription>Unresolved security events</CardDescription>
+              <CardDescription>{t('dashboard.securityAlertsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -194,7 +196,7 @@ export default function AdminDashboard() {
                   <div className="text-center py-4">
                     <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      No unresolved security events
+                      {t('dashboard.noSecurityEvents')}
                     </p>
                   </div>
                 )}

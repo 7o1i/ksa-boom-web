@@ -46,3 +46,14 @@
 ## File Storage
 - [ ] S3 integration for .exe file hosting (ready for upload)
 - [ ] Secure download URL generation (placeholder)
+
+## Multi-Language Translation Support
+- [x] Create i18n context and translation hook
+- [x] Add language switcher component
+- [x] Create translation files for English (default)
+- [x] Add translations to landing page
+- [x] Add translations to admin dashboard
+- [x] Add translations to license management page (partial - key UI elements)
+- [x] Add translations to security monitoring page (partial - key UI elements)
+- [x] Add translations to settings page (partial - key UI elements)
+- [x] Persist language preference in localStorage

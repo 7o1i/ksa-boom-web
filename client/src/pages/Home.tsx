@@ -4,9 +4,12 @@ import { trpc } from "@/lib/trpc";
 import { Download, Shield, Zap, Target, Eye, Settings, ChevronRight, Monitor, Lock, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const trackDownload = trpc.api.trackDownload.useMutation();
 
   const handleDownload = async () => {
@@ -31,18 +34,19 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="compact" />
             {isAuthenticated ? (
               <>
                 {user?.role === 'admin' && (
                   <Link href="/admin">
                     <Button variant="outline" className="border-primary/50 hover:border-primary hover:neon-border-pink">
                       <Shield className="w-4 h-4 mr-2" />
-                      Admin Panel
+                      {t('nav.adminPanel')}
                     </Button>
                   </Link>
                 )}
                 <span className="text-sm text-muted-foreground">
-                  Welcome, <span className="text-primary">{user?.name || 'User'}</span>
+                  {t('nav.welcome')}, <span className="text-primary">{user?.name || 'User'}</span>
                 </span>
               </>
             ) : (
@@ -76,7 +80,7 @@ export default function Home() {
               
               <div className="inline-block px-4 py-1 mb-6 border border-secondary/50 rounded-full">
                 <span className="text-sm text-secondary font-medium tracking-wider uppercase">
-                  Advanced Color Detection System
+                  {t('landing.badge')}
                 </span>
               </div>
               
@@ -87,8 +91,8 @@ export default function Home() {
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Professional-grade color tracking and automated mouse control for Windows. 
-                <span className="text-foreground"> Precision. Speed. Control.</span>
+                {t('landing.tagline')}
+                <span className="text-foreground"> {t('landing.precision')}</span>
               </p>
             </div>
 
@@ -100,11 +104,11 @@ export default function Home() {
                 className="relative group px-8 py-6 text-lg font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-pink transition-all duration-300"
               >
                 <Download className="w-5 h-5 mr-2" />
-                DOWNLOAD FOR WINDOWS
+                {t('landing.download')}
                 <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <span className="text-sm text-muted-foreground">
-                v1.0.0 • Windows 10/11 • 64-bit
+                {t('landing.version')}
               </span>
             </div>
           </div>
@@ -116,12 +120,12 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              <span className="neon-text-cyan">SYSTEM</span>
+              <span className="neon-text-cyan">{t('landing.featuresTitle').split(' // ')[0]}</span>
               <span className="text-muted-foreground"> // </span>
-              <span className="text-foreground">FEATURES</span>
+              <span className="text-foreground">{t('landing.featuresTitle').split(' // ')[1] || 'FEATURES'}</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Engineered for performance, designed for precision
+              {t('landing.featuresSubtitle')}
             </p>
           </div>
 
@@ -129,38 +133,38 @@ export default function Home() {
             {/* Feature Cards */}
             <FeatureCard 
               icon={<Target className="w-6 h-6" />}
-              title="Color Detection"
-              description="Advanced pixel-level color tracking with customizable tolerance and multi-color support."
+              title={t('landing.feature.colorDetection')}
+              description={t('landing.feature.colorDetectionDesc')}
               accent="pink"
             />
             <FeatureCard 
               icon={<Zap className="w-6 h-6" />}
-              title="Instant Response"
-              description="Sub-millisecond detection with optimized algorithms for real-time performance."
+              title={t('landing.feature.instantResponse')}
+              description={t('landing.feature.instantResponseDesc')}
               accent="cyan"
             />
             <FeatureCard 
               icon={<Eye className="w-6 h-6" />}
-              title="Region Selection"
-              description="Define specific screen regions to optimize performance and reduce false positives."
+              title={t('landing.feature.regionSelection')}
+              description={t('landing.feature.regionSelectionDesc')}
               accent="pink"
             />
             <FeatureCard 
               icon={<Settings className="w-6 h-6" />}
-              title="Full Control"
-              description="Adjustable click rates, tracking sensitivity, and customizable hotkeys."
+              title={t('landing.feature.fullControl')}
+              description={t('landing.feature.fullControlDesc')}
               accent="cyan"
             />
             <FeatureCard 
               icon={<Monitor className="w-6 h-6" />}
-              title="Multi-Monitor"
-              description="Seamless support for multi-monitor setups with independent region tracking."
+              title={t('landing.feature.multiMonitor')}
+              description={t('landing.feature.multiMonitorDesc')}
               accent="pink"
             />
             <FeatureCard 
               icon={<Lock className="w-6 h-6" />}
-              title="Secure Licensing"
-              description="Hardware-locked activation with encrypted license validation."
+              title={t('landing.feature.secureLicensing')}
+              description={t('landing.feature.secureLicensingDesc')}
               accent="cyan"
             />
           </div>
@@ -171,10 +175,10 @@ export default function Home() {
       <section className="py-20 border-t border-border/30 bg-card/30">
         <div className="container">
           <div className="grid md:grid-cols-4 gap-8">
-            <StatCard value="<1ms" label="Response Time" />
-            <StatCard value="60+" label="FPS Tracking" />
-            <StatCard value="99.9%" label="Accuracy" />
-            <StatCard value="24/7" label="Support" />
+            <StatCard value="<1ms" label={t('landing.stats.responseTime')} />
+            <StatCard value="60+" label={t('landing.stats.fpsTracking')} />
+            <StatCard value="99.9%" label={t('landing.stats.accuracy')} />
+            <StatCard value="24/7" label={t('landing.stats.support')} />
           </div>
         </div>
       </section>
@@ -191,10 +195,10 @@ export default function Home() {
             
             <Activity className="w-12 h-12 mx-auto mb-4 text-primary neon-text-pink" />
             <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
-              Ready to <span className="neon-text-pink">Dominate</span>?
+              {t('landing.cta.title').split('Dominate')[0]}<span className="neon-text-pink">Dominate</span>?
             </h2>
             <p className="text-muted-foreground mb-6">
-              Download KSA,Boom now and experience the next level of color tracking technology.
+              {t('landing.cta.subtitle')}
             </p>
             <Button 
               size="lg" 
@@ -202,7 +206,7 @@ export default function Home() {
               className="font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-pink"
             >
               <Download className="w-5 h-5 mr-2" />
-              GET STARTED
+              {t('landing.cta.button')}
             </Button>
           </div>
         </div>
@@ -220,11 +224,11 @@ export default function Home() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 KSA,Boom. All rights reserved.
+              {t('landing.footer')}
             </p>
             {isAuthenticated && user?.role === 'admin' && (
               <Link href="/admin" className="text-sm text-primary hover:underline">
-                Admin Dashboard
+                {t('nav.adminPanel')}
               </Link>
             )}
           </div>

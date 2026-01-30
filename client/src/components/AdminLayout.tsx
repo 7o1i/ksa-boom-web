@@ -21,20 +21,15 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Key, Shield, Settings, Home, Bell } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Key, Shield, Settings, Home } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "./ui/badge";
-
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-  { icon: Key, label: "Licenses", path: "/admin/licenses" },
-  { icon: Shield, label: "Security", path: "/admin/security" },
-  { icon: Settings, label: "Settings", path: "/admin/settings" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const SIDEBAR_WIDTH_KEY = "admin-sidebar-width";
 const DEFAULT_WIDTH = 260;
@@ -51,6 +46,7 @@ export default function AdminLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -70,6 +66,10 @@ export default function AdminLayout({
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-secondary" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-secondary" />
           
+          <div className="absolute top-4 right-4">
+            <LanguageSwitcher variant="icon" />
+          </div>
+          
           <div className="flex flex-col items-center gap-6">
             <div className="font-display text-2xl font-bold">
               <span className="neon-text-pink">KSA</span>
@@ -77,10 +77,10 @@ export default function AdminLayout({
               <span className="neon-text-cyan">Boom</span>
             </div>
             <h1 className="text-xl font-semibold tracking-tight text-center">
-              Admin Access Required
+              {t('auth.adminAccessRequired')}
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Sign in with an admin account to access the control panel.
+              {t('auth.adminAccessDesc')}
             </p>
           </div>
           <Button
@@ -90,7 +90,7 @@ export default function AdminLayout({
             size="lg"
             className="w-full font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-pink"
           >
-            Sign in
+            {t('auth.signIn')}
           </Button>
         </div>
       </div>
@@ -106,17 +106,21 @@ export default function AdminLayout({
           <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-destructive" />
           <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-destructive" />
           
+          <div className="absolute top-4 right-4">
+            <LanguageSwitcher variant="icon" />
+          </div>
+          
           <Shield className="w-16 h-16 text-destructive" />
           <h1 className="font-display text-2xl font-bold text-destructive">
-            ACCESS DENIED
+            {t('auth.accessDenied')}
           </h1>
           <p className="text-sm text-muted-foreground text-center">
-            You do not have permission to access the admin panel.
+            {t('auth.noPermission')}
           </p>
           <Link href="/">
             <Button variant="outline" className="font-display">
               <Home className="w-4 h-4 mr-2" />
-              Return Home
+              {t('auth.returnHome')}
             </Button>
           </Link>
         </div>
@@ -154,8 +158,17 @@ function AdminLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
+  
+  const menuItems = [
+    { icon: LayoutDashboard, label: t('nav.dashboard'), path: "/admin" },
+    { icon: Key, label: t('nav.licenses'), path: "/admin/licenses" },
+    { icon: Shield, label: t('nav.security'), path: "/admin/security" },
+    { icon: Settings, label: t('nav.settings'), path: "/admin/settings" },
+  ];
+  
+  const activeMenuItem = menuItems.find(item => item.path === location);
   
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     refetchInterval: 30000,
@@ -259,11 +272,11 @@ function AdminLayoutContent({
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => setLocation('/')}
-                    tooltip="Back to Site"
+                    tooltip={t('nav.backToSite')}
                     className="h-10 text-muted-foreground hover:text-foreground"
                   >
                     <Home className="h-4 w-4" />
-                    <span>Back to Site</span>
+                    <span>{t('nav.backToSite')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -290,12 +303,17 @@ function AdminLayoutContent({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <div className="px-2 py-1.5">
+                    <LanguageSwitcher variant="compact" className="w-full" />
+                  </div>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>{t('nav.signOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
