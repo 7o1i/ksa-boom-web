@@ -56,6 +56,38 @@ export default function Pricing() {
     }
   };
 
+  // Map feature keys to translation keys
+  const featureTranslationMap: Record<string, string> = {
+    'Full access to all features': 'plan.feature.fullAccess',
+    'Advanced color detection': 'plan.feature.colorDetection',
+    'Multi-monitor support': 'plan.feature.multiMonitor',
+    'Custom hotkeys': 'plan.feature.customHotkeys',
+    'Priority support': 'plan.feature.prioritySupport',
+    'Free updates': 'plan.feature.updates',
+    'Hardware-locked license': 'plan.feature.hwLock',
+    'Email support': 'plan.feature.emailSupport',
+    'Weekly updates': 'plan.feature.weeklyUpdates',
+    'Monthly updates': 'plan.feature.monthlyUpdates',
+    'Yearly updates': 'plan.feature.yearlyUpdates',
+    'Basic support': 'plan.feature.basicSupport',
+    'Premium support': 'plan.feature.premiumSupport',
+    'Dedicated support': 'plan.feature.dedicatedSupport',
+    'All premium features': 'plan.feature.allFeatures',
+    'Unlimited use': 'plan.feature.unlimitedUse',
+    'Fast response time': 'plan.feature.fastResponse',
+    'Region selection': 'plan.feature.regionSelection',
+    'Click automation': 'plan.feature.clickAutomation',
+    'Best value': 'plan.feature.bestValue',
+  };
+
+  const translateFeature = (feature: string): string => {
+    const translationKey = featureTranslationMap[feature];
+    if (translationKey) {
+      return t(translationKey);
+    }
+    return feature;
+  };
+
   const getPlanFeatures = (features: string | null) => {
     if (!features) return [];
     try {
@@ -160,7 +192,7 @@ export default function Pricing() {
                     {getPlanFeatures(plan.features).map((feature: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2">
                         <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
+                        <span className="text-sm text-muted-foreground">{translateFeature(feature)}</span>
                       </li>
                     ))}
                   </ul>

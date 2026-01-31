@@ -112,3 +112,4 @@
 - [x] Remove expired licenses from system (cleanup runs every 24 hours, removes licenses expired > 30 days)
 - [x] Update API endpoint for Windows app license validation with expiration check
 - [x] Add maintenance endpoints for manual expiration and cleanup triggers
+- [x] Add translations for subscription plan features
