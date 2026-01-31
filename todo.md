@@ -102,3 +102,13 @@
 ## Bug Fixes
 - [x] Fix subscription plans not appearing on Pricing page (added plans to database)
 - [x] Fix incomplete translations - add all missing translation keys for all pages
+- [ ] Add complete translations for Settings page and remaining untranslated content
+
+## License Expiration System (NEW)
+- [x] Add expiresAt field to licenses table
+- [x] Link licenses to subscription plans with duration (planId field added)
+- [x] Calculate expiration dates based on plan duration (weekly=7 days, monthly=30 days, yearly=365 days)
+- [x] Create cron job to automatically expire licenses (runs every hour)
+- [x] Remove expired licenses from system (cleanup runs every 24 hours, removes licenses expired > 30 days)
+- [x] Update API endpoint for Windows app license validation with expiration check
+- [x] Add maintenance endpoints for manual expiration and cleanup triggers

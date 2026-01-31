@@ -524,6 +524,52 @@ export const appRouter = router({
 
         return { success: true };
       }),
+
+    // Enhanced license validation for Windows app (returns more details)
+    checkLicense: publicProcedure
+      .input(z.object({
+        licenseKey: z.string(),
+        hwid: z.string().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        const ipAddress = ctx.req.ip || ctx.req.headers['x-forwarded-for']?.toString().split(',')[0] || 'unknown';
+        const result = await db.validateLicenseForApp(input.licenseKey, input.hwid, ipAddress);
+        return result;
+      }),
+
+    // Get licenses expiring soon (for admin notifications)
+    expiringLicenses: adminProcedure
+      .input(z.object({ days: z.number().min(1).max(90).default(7) }).optional())
+      .query(async ({ input }) => {
+        return db.getLicensesExpiringWithin(input?.days || 7);
+      }),
+  }),
+
+  // Cron/Maintenance endpoints (Admin only)
+  maintenance: router({
+    // Manually trigger license expiration check
+    expireLicenses: adminProcedure.mutation(async () => {
+      const { triggerExpirationCheck } = await import('./cron');
+      const result = await triggerExpirationCheck();
+      return result;
+    }),
+
+    // Manually trigger cleanup of old expired licenses
+    cleanupExpired: adminProcedure
+      .input(z.object({ daysOld: z.number().min(1).default(30) }).optional())
+      .mutation(async ({ input }) => {
+        const { triggerCleanup } = await import('./cron');
+        const result = await triggerCleanup(input?.daysOld || 30);
+        return result;
+      }),
+
+    // Get licenses that will expire soon
+    expiringLicenses: adminProcedure
+      .input(z.object({ days: z.number().min(1).max(90).default(7) }).optional())
+      .query(async ({ input }) => {
+        const { getExpiringLicenses } = await import('./cron');
+        return getExpiringLicenses(input?.days || 7);
+      }),
   }),
 });
 

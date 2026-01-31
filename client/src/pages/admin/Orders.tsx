@@ -15,14 +15,14 @@ import {
   MoreHorizontal,
   Eye,
   DollarSign,
-  Users,
-  TrendingUp,
   Loader2
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Orders() {
+  const { t } = useLanguage();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
@@ -34,7 +34,7 @@ export default function Orders() {
 
   const confirmMutation = trpc.orders.confirm.useMutation({
     onSuccess: (data) => {
-      toast.success(`Order confirmed! License key: ${data.license.licenseKey}`);
+      toast.success(t('orders.orderConfirmed'));
       utils.orders.list.invalidate();
       utils.orders.stats.invalidate();
       setConfirmingId(null);
@@ -47,7 +47,7 @@ export default function Orders() {
 
   const cancelMutation = trpc.orders.cancel.useMutation({
     onSuccess: () => {
-      toast.success("Order cancelled");
+      toast.success(t('orders.orderCancelled'));
       utils.orders.list.invalidate();
       utils.orders.stats.invalidate();
     },
@@ -64,11 +64,11 @@ export default function Orders() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+        return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500"><Clock className="h-3 w-3 mr-1" />{t('dashboard.pending')}</Badge>;
       case "confirmed":
-        return <Badge variant="outline" className="border-green-500/50 text-green-500"><CheckCircle className="h-3 w-3 mr-1" />Confirmed</Badge>;
+        return <Badge variant="outline" className="border-green-500/50 text-green-500"><CheckCircle className="h-3 w-3 mr-1" />{t('orders.confirmedOrders')}</Badge>;
       case "cancelled":
-        return <Badge variant="outline" className="border-red-500/50 text-red-500"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
+        return <Badge variant="outline" className="border-red-500/50 text-red-500"><XCircle className="h-3 w-3 mr-1" />{t('orders.cancelledOrders')}</Badge>;
       case "refunded":
         return <Badge variant="outline" className="border-purple-500/50 text-purple-500">Refunded</Badge>;
       default:
@@ -83,22 +83,25 @@ export default function Orders() {
 
   const pendingOrders = orders?.filter(o => o.status === "pending") || [];
   const confirmedOrders = orders?.filter(o => o.status === "confirmed") || [];
-  const otherOrders = orders?.filter(o => o.status !== "pending" && o.status !== "confirmed") || [];
 
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-display font-bold">Order Management</h1>
-          <p className="text-muted-foreground">Manage customer orders and subscriptions</p>
+          <h1 className="font-display text-3xl font-bold tracking-wider">
+            <span className="neon-text-gold">{t('orders.title').split(' // ')[0]}</span>
+            <span className="text-muted-foreground"> // </span>
+            <span className="text-foreground">{t('orders.title').split(' // ')[1] || t('nav.orders')}</span>
+          </h1>
+          <p className="text-muted-foreground mt-1">{t('orders.subtitle')}</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-2">
-              <CardDescription>Total Orders</CardDescription>
+              <CardDescription>{t('orders.allOrders')}</CardDescription>
               <CardTitle className="text-2xl font-display flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5 text-primary" />
                 {stats?.total || 0}
@@ -107,7 +110,7 @@ export default function Orders() {
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-2">
-              <CardDescription>Pending</CardDescription>
+              <CardDescription>{t('orders.pendingOrders')}</CardDescription>
               <CardTitle className="text-2xl font-display flex items-center gap-2">
                 <Clock className="h-5 w-5 text-yellow-500" />
                 {stats?.pending || 0}
@@ -116,7 +119,7 @@ export default function Orders() {
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-2">
-              <CardDescription>Confirmed</CardDescription>
+              <CardDescription>{t('orders.confirmedOrders')}</CardDescription>
               <CardTitle className="text-2xl font-display flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 {stats?.confirmed || 0}
@@ -125,7 +128,7 @@ export default function Orders() {
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-2">
-              <CardDescription>Total Revenue</CardDescription>
+              <CardDescription>{t('dashboard.revenue')}</CardDescription>
               <CardTitle className="text-2xl font-display flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-primary" />
                 {stats?.totalRevenue || 0} SAR
@@ -137,20 +140,20 @@ export default function Orders() {
         {/* Orders Table */}
         <Card className="border-border/50 bg-card/50">
           <CardHeader>
-            <CardTitle className="font-display">Orders</CardTitle>
-            <CardDescription>View and manage all customer orders</CardDescription>
+            <CardTitle className="font-display">{t('nav.orders')}</CardTitle>
+            <CardDescription>{t('orders.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="pending">
               <TabsList className="mb-4">
                 <TabsTrigger value="pending">
-                  Pending ({pendingOrders.length})
+                  {t('orders.pendingOrders')} ({pendingOrders.length})
                 </TabsTrigger>
                 <TabsTrigger value="confirmed">
-                  Confirmed ({confirmedOrders.length})
+                  {t('orders.confirmedOrders')} ({confirmedOrders.length})
                 </TabsTrigger>
                 <TabsTrigger value="all">
-                  All Orders ({orders?.length || 0})
+                  {t('orders.allOrders')} ({orders?.length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -164,6 +167,7 @@ export default function Orders() {
                   onConfirm={handleConfirm}
                   onCancel={(id) => cancelMutation.mutate({ id })}
                   confirmingId={confirmingId}
+                  t={t}
                 />
               </TabsContent>
 
@@ -177,6 +181,7 @@ export default function Orders() {
                   onConfirm={handleConfirm}
                   onCancel={(id) => cancelMutation.mutate({ id })}
                   confirmingId={confirmingId}
+                  t={t}
                 />
               </TabsContent>
 
@@ -190,6 +195,7 @@ export default function Orders() {
                   onConfirm={handleConfirm}
                   onCancel={(id) => cancelMutation.mutate({ id })}
                   confirmingId={confirmingId}
+                  t={t}
                 />
               </TabsContent>
             </Tabs>
@@ -200,57 +206,45 @@ export default function Orders() {
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
           <DialogContent className="border-border/50 bg-card">
             <DialogHeader>
-              <DialogTitle className="font-display">Order Details</DialogTitle>
+              <DialogTitle className="font-display">{t('common.view')} {t('nav.orders')}</DialogTitle>
               <DialogDescription>
-                Order #{selectedOrder?.orderNumber}
+                {t('orders.orderNumber')}{selectedOrder?.orderNumber}
               </DialogDescription>
             </DialogHeader>
             {selectedOrder && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
+                    <p className="text-sm text-muted-foreground">{t('orders.status')}</p>
                     <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Amount</p>
+                    <p className="text-sm text-muted-foreground">{t('orders.amount')}</p>
                     <p className="font-bold">{selectedOrder.amount} {selectedOrder.currency}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Customer Email</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.customer')}</p>
                   <p className="font-mono">{selectedOrder.customerEmail}</p>
                 </div>
                 {selectedOrder.customerName && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Customer Name</p>
+                    <p className="text-sm text-muted-foreground">{t('pricing.yourName')}</p>
                     <p>{selectedOrder.customerName}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-muted-foreground">Plan</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.plan')}</p>
                   <p>{getPlanName(selectedOrder.planId)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Created</p>
+                  <p className="text-sm text-muted-foreground">{t('orders.date')}</p>
                   <p>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
                 </div>
-                {selectedOrder.confirmedAt && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Confirmed</p>
-                    <p>{new Date(selectedOrder.confirmedAt).toLocaleString()}</p>
-                  </div>
-                )}
-                {selectedOrder.licenseKeyId && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">License Key ID</p>
-                    <p className="font-mono">{selectedOrder.licenseKeyId}</p>
-                  </div>
-                )}
               </div>
             )}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button>
+              <Button variant="outline" onClick={() => setIsViewOpen(false)}>{t('common.close')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -267,7 +261,8 @@ function OrdersTable({
   onView, 
   onConfirm, 
   onCancel,
-  confirmingId
+  confirmingId,
+  t
 }: {
   orders: any[];
   isLoading: boolean;
@@ -277,6 +272,7 @@ function OrdersTable({
   onConfirm: (id: number) => void;
   onCancel: (id: number) => void;
   confirmingId: number | null;
+  t: (key: string) => string;
 }) {
   if (isLoading) {
     return (
@@ -289,7 +285,7 @@ function OrdersTable({
   if (orders.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No orders found
+        {t('orders.noOrders')}
       </div>
     );
   }
@@ -299,12 +295,12 @@ function OrdersTable({
       <Table>
         <TableHeader>
           <TableRow className="border-border/30">
-            <TableHead>Order #</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Plan</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>{t('orders.orderNumber')}</TableHead>
+            <TableHead>{t('orders.customer')}</TableHead>
+            <TableHead>{t('orders.plan')}</TableHead>
+            <TableHead>{t('orders.amount')}</TableHead>
+            <TableHead>{t('orders.status')}</TableHead>
+            <TableHead>{t('orders.date')}</TableHead>
             <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -334,7 +330,7 @@ function OrdersTable({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onView(order)}>
                       <Eye className="h-4 w-4 mr-2" />
-                      View Details
+                      {t('common.view')}
                     </DropdownMenuItem>
                     {order.status === "pending" && (
                       <>
@@ -347,14 +343,14 @@ function OrdersTable({
                           ) : (
                             <CheckCircle className="h-4 w-4 mr-2" />
                           )}
-                          Confirm Payment
+                          {t('orders.confirm')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-destructive"
                           onClick={() => onCancel(order.id)}
                         >
                           <XCircle className="h-4 w-4 mr-2" />
-                          Cancel Order
+                          {t('orders.cancel')}
                         </DropdownMenuItem>
                       </>
                     )}

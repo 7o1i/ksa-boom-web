@@ -49,8 +49,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function LicenseManagement() {
+  const { t } = useLanguage();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -65,7 +67,7 @@ export default function LicenseManagement() {
       utils.license.list.invalidate();
       utils.license.stats.invalidate();
       setIsCreateOpen(false);
-      toast.success("License key created successfully");
+      toast.success(t('licenses.createSuccess'));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -78,7 +80,7 @@ export default function LicenseManagement() {
       utils.license.stats.invalidate();
       setIsEditOpen(false);
       setEditingLicense(null);
-      toast.success("License updated successfully");
+      toast.success(t('licenses.updateSuccess'));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -90,7 +92,7 @@ export default function LicenseManagement() {
       utils.license.list.invalidate();
       utils.license.stats.invalidate();
       setDeleteId(null);
-      toast.success("License deleted successfully");
+      toast.success(t('licenses.deleteSuccess'));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -125,19 +127,19 @@ export default function LicenseManagement() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("License key copied to clipboard");
+    toast.success(t('licenses.copiedToClipboard'));
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-500/20 text-green-500 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" />Active</Badge>;
+        return <Badge className="bg-green-500/20 text-green-500 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" />{t('dashboard.active')}</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30"><Clock className="w-3 h-3 mr-1" />{t('dashboard.pending')}</Badge>;
       case 'expired':
-        return <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30"><XCircle className="w-3 h-3 mr-1" />Expired</Badge>;
+        return <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30"><XCircle className="w-3 h-3 mr-1" />{t('licenses.expired')}</Badge>;
       case 'revoked':
-        return <Badge className="bg-red-500/20 text-red-500 border-red-500/30"><Ban className="w-3 h-3 mr-1" />Revoked</Badge>;
+        return <Badge className="bg-red-500/20 text-red-500 border-red-500/30"><Ban className="w-3 h-3 mr-1" />{t('licenses.revoked')}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -150,65 +152,65 @@ export default function LicenseManagement() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold tracking-wider">
-              <span className="neon-text-pink">LICENSE</span>
+              <span className="neon-text-gold">{t('licenses.title').split(' // ')[0]}</span>
               <span className="text-muted-foreground"> // </span>
-              <span className="text-foreground">MANAGEMENT</span>
+              <span className="text-foreground">{t('licenses.title').split(' // ')[1] || t('nav.licenses')}</span>
             </h1>
             <p className="text-muted-foreground mt-1">
-              Create and manage activation keys
+              {t('licenses.subtitle')}
             </p>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="font-display font-bold bg-primary hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
-                Generate Key
+                {t('licenses.generateKey')}
               </Button>
             </DialogTrigger>
             <DialogContent className="border-border/50 bg-card">
               <DialogHeader>
-                <DialogTitle className="font-display">Generate New License Key</DialogTitle>
+                <DialogTitle className="font-display">{t('licenses.generateNewKey')}</DialogTitle>
                 <DialogDescription>
-                  Create a new activation key for distribution
+                  {t('licenses.generateNewKeyDesc')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreate}>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="assignedTo">Assigned To (Optional)</Label>
-                    <Input id="assignedTo" name="assignedTo" placeholder="Customer name" />
+                    <Label htmlFor="assignedTo">{t('licenses.assignedTo')}</Label>
+                    <Input id="assignedTo" name="assignedTo" placeholder={t('licenses.customerName')} />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="assignedEmail">Email (Optional)</Label>
+                    <Label htmlFor="assignedEmail">{t('licenses.email')}</Label>
                     <Input id="assignedEmail" name="assignedEmail" type="email" placeholder="customer@example.com" />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="maxActivations">Max Activations</Label>
+                    <Label htmlFor="maxActivations">{t('licenses.maxActivations')}</Label>
                     <Input id="maxActivations" name="maxActivations" type="number" min="1" defaultValue="1" />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="status">Initial Status</Label>
+                    <Label htmlFor="status">{t('licenses.initialStatus')}</Label>
                     <Select name="status" defaultValue="pending">
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="pending">{t('dashboard.pending')}</SelectItem>
+                        <SelectItem value="active">{t('dashboard.active')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="notes">Notes (Optional)</Label>
-                    <Textarea id="notes" name="notes" placeholder="Internal notes about this license" />
+                    <Label htmlFor="notes">{t('licenses.notes')}</Label>
+                    <Textarea id="notes" name="notes" placeholder={t('licenses.notesPlaceholder')} />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? "Generating..." : "Generate Key"}
+                    {createMutation.isPending ? t('licenses.generating') : t('licenses.generateKey')}
                   </Button>
                 </DialogFooter>
               </form>
@@ -221,7 +223,7 @@ export default function LicenseManagement() {
           <Card className="border-border/30 bg-card/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total</span>
+                <span className="text-sm text-muted-foreground">{t('dashboard.total')}</span>
                 <span className="font-display text-2xl font-bold text-foreground">{stats?.total || 0}</span>
               </div>
             </CardContent>
@@ -229,7 +231,7 @@ export default function LicenseManagement() {
           <Card className="border-green-500/30 bg-green-500/5">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-green-500">Active</span>
+                <span className="text-sm text-green-500">{t('dashboard.active')}</span>
                 <span className="font-display text-2xl font-bold text-green-500">{stats?.active || 0}</span>
               </div>
             </CardContent>
@@ -237,7 +239,7 @@ export default function LicenseManagement() {
           <Card className="border-yellow-500/30 bg-yellow-500/5">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-yellow-500">Pending</span>
+                <span className="text-sm text-yellow-500">{t('dashboard.pending')}</span>
                 <span className="font-display text-2xl font-bold text-yellow-500">{stats?.pending || 0}</span>
               </div>
             </CardContent>
@@ -245,7 +247,7 @@ export default function LicenseManagement() {
           <Card className="border-red-500/30 bg-red-500/5">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-red-500">Revoked</span>
+                <span className="text-sm text-red-500">{t('licenses.revoked')}</span>
                 <span className="font-display text-2xl font-bold text-red-500">{stats?.revoked || 0}</span>
               </div>
             </CardContent>
@@ -257,20 +259,20 @@ export default function LicenseManagement() {
           <CardHeader>
             <CardTitle className="font-display flex items-center gap-2">
               <Key className="w-5 h-5 text-primary" />
-              License Keys
+              {t('licenses.licenseKeys')}
             </CardTitle>
-            <CardDescription>All generated license keys</CardDescription>
+            <CardDescription>{t('licenses.allLicenseKeys')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-lg border border-border/30 overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="border-border/30 hover:bg-transparent">
-                    <TableHead className="font-display">License Key</TableHead>
-                    <TableHead className="font-display">Status</TableHead>
-                    <TableHead className="font-display">Assigned To</TableHead>
-                    <TableHead className="font-display">Activations</TableHead>
-                    <TableHead className="font-display">Created</TableHead>
+                    <TableHead className="font-display">{t('licenses.licenseKey')}</TableHead>
+                    <TableHead className="font-display">{t('licenses.status')}</TableHead>
+                    <TableHead className="font-display">{t('licenses.assignedTo')}</TableHead>
+                    <TableHead className="font-display">{t('licenses.activations')}</TableHead>
+                    <TableHead className="font-display">{t('licenses.created')}</TableHead>
                     <TableHead className="font-display w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -278,13 +280,13 @@ export default function LicenseManagement() {
                   {isLoading ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        Loading licenses...
+                        {t('common.loading')}
                       </TableCell>
                     </TableRow>
                   ) : licenses?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No license keys generated yet
+                        {t('licenses.noLicenses')}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -332,21 +334,21 @@ export default function LicenseManagement() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => copyToClipboard(license.licenseKey)}>
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copy Key
+                                {t('licenses.copyKey')}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => {
                                 setEditingLicense(license);
                                 setIsEditOpen(true);
                               }}>
                                 <Edit className="h-4 w-4 mr-2" />
-                                Edit
+                                {t('common.edit')}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => setDeleteId(license.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                                {t('common.delete')}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -367,31 +369,31 @@ export default function LicenseManagement() {
         }}>
           <DialogContent className="border-border/50 bg-card">
             <DialogHeader>
-              <DialogTitle className="font-display">Edit License</DialogTitle>
+              <DialogTitle className="font-display">{t('licenses.editLicense')}</DialogTitle>
               <DialogDescription>
-                Update license key details
+                {t('licenses.editLicenseDesc')}
               </DialogDescription>
             </DialogHeader>
             {editingLicense && (
               <form onSubmit={handleEdit}>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label>License Key</Label>
+                    <Label>{t('licenses.licenseKey')}</Label>
                     <code className="text-sm font-mono bg-muted/50 px-3 py-2 rounded">
                       {editingLicense.licenseKey}
                     </code>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-assignedTo">Assigned To</Label>
+                    <Label htmlFor="edit-assignedTo">{t('licenses.assignedTo')}</Label>
                     <Input
                       id="edit-assignedTo"
                       name="assignedTo"
                       defaultValue={editingLicense.assignedTo || ''}
-                      placeholder="Customer name"
+                      placeholder={t('licenses.customerName')}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-assignedEmail">Email</Label>
+                    <Label htmlFor="edit-assignedEmail">{t('licenses.email')}</Label>
                     <Input
                       id="edit-assignedEmail"
                       name="assignedEmail"
@@ -401,7 +403,7 @@ export default function LicenseManagement() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-maxActivations">Max Activations</Label>
+                    <Label htmlFor="edit-maxActivations">{t('licenses.maxActivations')}</Label>
                     <Input
                       id="edit-maxActivations"
                       name="maxActivations"
@@ -411,35 +413,35 @@ export default function LicenseManagement() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-status">Status</Label>
+                    <Label htmlFor="edit-status">{t('licenses.status')}</Label>
                     <Select name="status" defaultValue={editingLicense.status}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
-                        <SelectItem value="revoked">Revoked</SelectItem>
+                        <SelectItem value="pending">{t('dashboard.pending')}</SelectItem>
+                        <SelectItem value="active">{t('dashboard.active')}</SelectItem>
+                        <SelectItem value="expired">{t('licenses.expired')}</SelectItem>
+                        <SelectItem value="revoked">{t('licenses.revoked')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-notes">Notes</Label>
+                    <Label htmlFor="edit-notes">{t('licenses.notes')}</Label>
                     <Textarea
                       id="edit-notes"
                       name="notes"
                       defaultValue={editingLicense.notes || ''}
-                      placeholder="Internal notes"
+                      placeholder={t('licenses.notesPlaceholder')}
                     />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={updateMutation.isPending}>
-                    {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                    {updateMutation.isPending ? t('common.loading') : t('common.save')}
                   </Button>
                 </DialogFooter>
               </form>
@@ -451,18 +453,18 @@ export default function LicenseManagement() {
         <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
           <AlertDialogContent className="border-border/50 bg-card">
             <AlertDialogHeader>
-              <AlertDialogTitle className="font-display">Delete License Key?</AlertDialogTitle>
+              <AlertDialogTitle className="font-display">{t('licenses.deleteLicense')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. The license key will be permanently deleted.
+                {t('licenses.deleteLicenseDesc')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive hover:bg-destructive/90"
                 onClick={() => deleteId && deleteMutation.mutate({ id: deleteId })}
               >
-                Delete
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -8,17 +8,19 @@ import { Settings, Upload, Download, Key, Shield, Bell, Database, FileCode } fro
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AdminSettings() {
+  const { t } = useLanguage();
   const { data: downloadStats } = trpc.dashboard.downloadStats.useQuery();
   const { data: licenseStats } = trpc.license.stats.useQuery();
 
   const handleExportLicenses = () => {
-    toast.info("Export functionality coming soon");
+    toast.info(t('common.comingSoon'));
   };
 
   const handleUploadApp = () => {
-    toast.info("App upload functionality coming soon. Use S3 storage to host the .exe file.");
+    toast.info(t('common.comingSoon'));
   };
 
   return (
@@ -27,12 +29,12 @@ export default function AdminSettings() {
         {/* Header */}
         <div>
           <h1 className="font-display text-3xl font-bold tracking-wider">
-            <span className="neon-text-cyan">SYSTEM</span>
+            <span className="neon-text-cyan">{t('settings.title').split(' // ')[0]}</span>
             <span className="text-muted-foreground"> // </span>
-            <span className="text-foreground">SETTINGS</span>
+            <span className="text-foreground">{t('settings.title').split(' // ')[1] || t('nav.settings')}</span>
           </h1>
           <p className="text-muted-foreground mt-1">
-            Configure application settings and preferences
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -42,17 +44,17 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
-                Application Distribution
+                {t('settings.appDistribution')}
               </CardTitle>
               <CardDescription>
-                Manage the Windows application download
+                {t('settings.appDistributionDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 rounded-lg border border-border/30 bg-background/50">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="font-medium">Current Version</p>
+                    <p className="font-medium">{t('settings.currentVersion')}</p>
                     <p className="text-sm text-muted-foreground">KSABoom-Setup.exe</p>
                   </div>
                   <span className="font-display text-lg font-bold text-secondary">v1.0.0</span>
@@ -60,24 +62,24 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="font-display text-2xl font-bold">{downloadStats?.total || 0}</p>
-                    <p className="text-xs text-muted-foreground">Total Downloads</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.totalDownloads')}</p>
                   </div>
                   <div>
                     <p className="font-display text-2xl font-bold text-secondary">{downloadStats?.today || 0}</p>
-                    <p className="text-xs text-muted-foreground">Today</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.today')}</p>
                   </div>
                   <div>
                     <p className="font-display text-2xl font-bold">{downloadStats?.thisWeek || 0}</p>
-                    <p className="text-xs text-muted-foreground">This Week</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.thisWeek')}</p>
                   </div>
                 </div>
               </div>
               <Button onClick={handleUploadApp} className="w-full" variant="outline">
                 <Upload className="w-4 h-4 mr-2" />
-                Upload New Version
+                {t('settings.uploadNewVersion')}
               </Button>
               <p className="text-xs text-muted-foreground">
-                Upload the compiled .exe file to make it available for download on the landing page.
+                {t('settings.uploadDesc')}
               </p>
             </CardContent>
           </Card>
@@ -87,10 +89,10 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <Key className="w-5 h-5 text-primary" />
-                License Configuration
+                {t('settings.licenseConfig')}
               </CardTitle>
               <CardDescription>
-                Configure license key settings
+                {t('settings.licenseConfigDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -98,26 +100,26 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="font-display text-2xl font-bold">{licenseStats?.total || 0}</p>
-                    <p className="text-xs text-muted-foreground">Total Keys</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.totalKeys')}</p>
                   </div>
                   <div>
                     <p className="font-display text-2xl font-bold text-green-500">{licenseStats?.active || 0}</p>
-                    <p className="text-xs text-muted-foreground">Active</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.active')}</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Default Max Activations</Label>
-                    <p className="text-xs text-muted-foreground">Per license key</p>
+                    <Label>{t('settings.defaultMaxActivations')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('settings.perLicenseKey')}</p>
                   </div>
                   <Input type="number" defaultValue="1" className="w-20" min="1" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Auto-expire after (days)</Label>
-                    <p className="text-xs text-muted-foreground">0 = never expire</p>
+                    <Label>{t('settings.autoExpire')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('settings.neverExpire')}</p>
                   </div>
                   <Input type="number" defaultValue="0" className="w-20" min="0" />
                 </div>
@@ -125,7 +127,7 @@ export default function AdminSettings() {
               <Separator />
               <Button onClick={handleExportLicenses} variant="outline" className="w-full">
                 <FileCode className="w-4 h-4 mr-2" />
-                Export All Licenses (CSV)
+                {t('settings.exportLicenses')}
               </Button>
             </CardContent>
           </Card>
@@ -135,41 +137,41 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                Security Settings
+                {t('settings.securitySettings')}
               </CardTitle>
               <CardDescription>
-                Configure security and monitoring options
+                {t('settings.securitySettingsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Brute Force Protection</Label>
-                  <p className="text-xs text-muted-foreground">Block after 5 failed attempts</p>
+                  <Label>{t('settings.bruteForceProtection')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.bruteForceProtectionDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>HWID Verification</Label>
-                  <p className="text-xs text-muted-foreground">Lock licenses to hardware</p>
+                  <Label>{t('settings.hwidVerification')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.hwidVerificationDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>IP Logging</Label>
-                  <p className="text-xs text-muted-foreground">Track activation IPs</p>
+                  <Label>{t('settings.ipLogging')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.ipLoggingDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Security Event Alerts</Label>
-                  <p className="text-xs text-muted-foreground">Email on critical events</p>
+                  <Label>{t('settings.securityEventAlerts')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.securityEventAlertsDesc')}</p>
                 </div>
                 <Switch />
               </div>
@@ -181,41 +183,41 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary" />
-                Notifications
+                {t('settings.notifications')}
               </CardTitle>
               <CardDescription>
-                Configure alert preferences
+                {t('settings.notificationsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>New Activations</Label>
-                  <p className="text-xs text-muted-foreground">Notify on successful activations</p>
+                  <Label>{t('settings.newActivations')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.newActivationsDesc')}</p>
                 </div>
                 <Switch />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Failed Activations</Label>
-                  <p className="text-xs text-muted-foreground">Alert on failed attempts</p>
+                  <Label>{t('settings.failedActivations')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.failedActivationsDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Security Alerts</Label>
-                  <p className="text-xs text-muted-foreground">Critical security events</p>
+                  <Label>{t('settings.securityAlertsNotif')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.securityAlertsNotifDesc')}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Daily Summary</Label>
-                  <p className="text-xs text-muted-foreground">Daily activity report</p>
+                  <Label>{t('settings.dailySummary')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('settings.dailySummaryDesc')}</p>
                 </div>
                 <Switch />
               </div>
@@ -228,48 +230,48 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="font-display flex items-center gap-2">
               <Database className="w-5 h-5 text-secondary" />
-              API Endpoints
+              {t('settings.apiEndpoints')}
             </CardTitle>
             <CardDescription>
-              Endpoints for Windows application integration
+              {t('settings.apiEndpointsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="p-4 rounded-lg border border-border/30 bg-background/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">License Validation</span>
+                  <span className="font-medium text-sm">{t('settings.licenseValidation')}</span>
                   <code className="text-xs bg-muted/50 px-2 py-1 rounded">POST</code>
                 </div>
                 <code className="text-xs text-muted-foreground block">
                   /api/trpc/api.validateLicense
                 </code>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Validates a license key and returns activation status. Requires: licenseKey, hwid (optional)
+                  {t('settings.licenseValidationDesc')}
                 </p>
               </div>
               <div className="p-4 rounded-lg border border-border/30 bg-background/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">Status Report</span>
+                  <span className="font-medium text-sm">{t('settings.statusReport')}</span>
                   <code className="text-xs bg-muted/50 px-2 py-1 rounded">POST</code>
                 </div>
                 <code className="text-xs text-muted-foreground block">
                   /api/trpc/api.reportStatus
                 </code>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Reports application status for monitoring. Requires: licenseKey, status, appVersion
+                  {t('settings.statusReportDesc')}
                 </p>
               </div>
               <div className="p-4 rounded-lg border border-border/30 bg-background/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">Track Download</span>
+                  <span className="font-medium text-sm">{t('settings.trackDownload')}</span>
                   <code className="text-xs bg-muted/50 px-2 py-1 rounded">POST</code>
                 </div>
                 <code className="text-xs text-muted-foreground block">
                   /api/trpc/api.trackDownload
                 </code>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Tracks application downloads for analytics.
+                  {t('settings.trackDownloadDesc')}
                 </p>
               </div>
             </div>
@@ -280,10 +282,10 @@ export default function AdminSettings() {
         <div className="flex justify-end">
           <Button 
             className="font-display font-bold bg-primary hover:bg-primary/90"
-            onClick={() => toast.success("Settings saved successfully")}
+            onClick={() => toast.success(t('settings.settingsSaved'))}
           >
             <Settings className="w-4 h-4 mr-2" />
-            Save Settings
+            {t('settings.saveSettings')}
           </Button>
         </div>
       </div>

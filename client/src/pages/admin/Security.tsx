@@ -14,8 +14,10 @@ import { Shield, AlertTriangle, CheckCircle, Clock, Activity, Ban, Eye, XCircle 
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SecurityMonitor() {
+  const { t } = useLanguage();
   const utils = trpc.useUtils();
   const { data: stats } = trpc.security.stats.useQuery();
   const { data: allEvents, isLoading: loadingAll } = trpc.security.events.useQuery({ limit: 100 });
@@ -29,7 +31,7 @@ export default function SecurityMonitor() {
       utils.security.events.invalidate();
       utils.security.stats.invalidate();
       utils.notifications.unreadCount.invalidate();
-      toast.success("Event marked as resolved");
+      toast.success(t('security.resolveSuccess'));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -39,7 +41,7 @@ export default function SecurityMonitor() {
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return <Badge className="bg-red-500/20 text-red-500 border-red-500/30">Critical</Badge>;
+        return <Badge className="bg-red-500/20 text-red-500 border-red-500/30">{t('security.critical')}</Badge>;
       case 'high':
         return <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">High</Badge>;
       case 'medium':
@@ -84,12 +86,12 @@ export default function SecurityMonitor() {
         <TableHeader>
           <TableRow className="border-border/30 hover:bg-transparent">
             <TableHead className="font-display w-[50px]"></TableHead>
-            <TableHead className="font-display">Event Type</TableHead>
-            <TableHead className="font-display">Severity</TableHead>
-            <TableHead className="font-display">IP Address</TableHead>
-            <TableHead className="font-display">Details</TableHead>
-            <TableHead className="font-display">Time</TableHead>
-            <TableHead className="font-display">Status</TableHead>
+            <TableHead className="font-display">{t('security.eventType')}</TableHead>
+            <TableHead className="font-display">{t('security.severity')}</TableHead>
+            <TableHead className="font-display">{t('security.ipAddress')}</TableHead>
+            <TableHead className="font-display">{t('security.details')}</TableHead>
+            <TableHead className="font-display">{t('security.time')}</TableHead>
+            <TableHead className="font-display">{t('security.statusLabel')}</TableHead>
             {showResolveButton && <TableHead className="font-display w-[100px]"></TableHead>}
           </TableRow>
         </TableHeader>
@@ -97,14 +99,14 @@ export default function SecurityMonitor() {
           {isLoading ? (
             <TableRow>
               <TableCell colSpan={showResolveButton ? 8 : 7} className="text-center py-8 text-muted-foreground">
-                Loading events...
+                {t('common.loading')}
               </TableCell>
             </TableRow>
           ) : events?.length === 0 ? (
             <TableRow>
               <TableCell colSpan={showResolveButton ? 8 : 7} className="text-center py-8">
                 <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                <p className="text-muted-foreground">No security events found</p>
+                <p className="text-muted-foreground">{t('security.noEvents')}</p>
               </TableCell>
             </TableRow>
           ) : (
@@ -148,12 +150,12 @@ export default function SecurityMonitor() {
                   {event.resolved ? (
                     <Badge variant="outline" className="text-green-500 border-green-500/30">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Resolved
+                      {t('security.resolved')}
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="text-yellow-500 border-yellow-500/30">
                       <Clock className="w-3 h-3 mr-1" />
-                      Open
+                      {t('security.open')}
                     </Badge>
                   )}
                 </TableCell>
@@ -167,7 +169,7 @@ export default function SecurityMonitor() {
                         disabled={resolveMutation.isPending}
                       >
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Resolve
+                        {t('security.resolve')}
                       </Button>
                     )}
                   </TableCell>
@@ -187,12 +189,12 @@ export default function SecurityMonitor() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold tracking-wider">
-              <span className="neon-text-pink">SECURITY</span>
+              <span className="neon-text-gold">{t('security.title').split(' // ')[0]}</span>
               <span className="text-muted-foreground"> // </span>
-              <span className="text-foreground">MONITOR</span>
+              <span className="text-foreground">{t('security.title').split(' // ')[1] || t('nav.security')}</span>
             </h1>
             <p className="text-muted-foreground mt-1">
-              Track and respond to security events
+              {t('security.subtitle')}
             </p>
           </div>
         </div>
@@ -204,7 +206,7 @@ export default function SecurityMonitor() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Total Events</span>
+                  <span className="text-sm text-muted-foreground">{t('security.totalEvents')}</span>
                 </div>
                 <span className="font-display text-2xl font-bold">{stats?.total || 0}</span>
               </div>
@@ -215,7 +217,7 @@ export default function SecurityMonitor() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-yellow-500" />
-                  <span className="text-sm text-yellow-500">Unresolved</span>
+                  <span className="text-sm text-yellow-500">{t('security.unresolved')}</span>
                 </div>
                 <span className="font-display text-2xl font-bold text-yellow-500">{stats?.unresolved || 0}</span>
               </div>
@@ -226,7 +228,7 @@ export default function SecurityMonitor() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-red-500" />
-                  <span className="text-sm text-red-500">Critical</span>
+                  <span className="text-sm text-red-500">{t('security.critical')}</span>
                 </div>
                 <span className="font-display text-2xl font-bold text-red-500">{stats?.critical || 0}</span>
               </div>
@@ -237,7 +239,7 @@ export default function SecurityMonitor() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-secondary" />
-                  <span className="text-sm text-secondary">Last 24h</span>
+                  <span className="text-sm text-secondary">{t('security.last24h')}</span>
                 </div>
                 <span className="font-display text-2xl font-bold text-secondary">{stats?.last24h || 0}</span>
               </div>
@@ -250,22 +252,22 @@ export default function SecurityMonitor() {
           <CardHeader>
             <CardTitle className="font-display flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              Security Events
+              {t('security.securityEvents')}
             </CardTitle>
-            <CardDescription>Monitor and manage security incidents</CardDescription>
+            <CardDescription>{t('security.securityEventsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="unresolved">
               <TabsList className="mb-4">
                 <TabsTrigger value="unresolved" className="font-display">
-                  Unresolved
+                  {t('security.unresolvedTab')}
                   {(stats?.unresolved || 0) > 0 && (
                     <Badge variant="destructive" className="ml-2 text-xs px-1.5 py-0">
                       {stats?.unresolved}
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="all" className="font-display">All Events</TabsTrigger>
+                <TabsTrigger value="all" className="font-display">{t('security.allEventsTab')}</TabsTrigger>
               </TabsList>
               <TabsContent value="unresolved">
                 <EventsTable events={unresolvedEvents} isLoading={loadingUnresolved} />
@@ -282,26 +284,26 @@ export default function SecurityMonitor() {
           <CardHeader>
             <CardTitle className="font-display text-lg flex items-center gap-2">
               <Shield className="w-5 h-5 text-secondary" />
-              Security Guidelines
+              {t('security.guidelines')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                <p><strong className="text-foreground">Brute Force:</strong> Multiple failed attempts from same IP. Consider blocking the IP address.</p>
+                <p><strong className="text-foreground">{t('security.bruteForce')}</strong> {t('security.bruteForceDesc')}</p>
               </div>
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
-                <p><strong className="text-foreground">HWID Mismatch:</strong> License used on different hardware. Verify with customer.</p>
+                <p><strong className="text-foreground">{t('security.hwidMismatch')}</strong> {t('security.hwidMismatchDesc')}</p>
               </div>
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-                <p><strong className="text-foreground">Invalid Key:</strong> Someone tried a non-existent key. May indicate key guessing.</p>
+                <p><strong className="text-foreground">{t('security.invalidKey')}</strong> {t('security.invalidKeyDesc')}</p>
               </div>
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                <p><strong className="text-foreground">Expired/Revoked:</strong> Attempted use of invalid license. May need customer follow-up.</p>
+                <p><strong className="text-foreground">{t('security.expiredRevoked')}</strong> {t('security.expiredRevokedDesc')}</p>
               </div>
             </div>
           </CardContent>

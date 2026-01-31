@@ -111,18 +111,32 @@ export function generateLicenseKey(): string {
   return segments.join('-');
 }
 
-export async function createLicenseKey(data: Partial<InsertLicenseKey> & { createdBy?: number }) {
+export async function createLicenseKey(data: Partial<InsertLicenseKey> & { createdBy?: number; planId?: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const licenseKey = generateLicenseKey();
+  
+  // Calculate expiration date from plan if planId is provided
+  let expiresAt = data.expiresAt || null;
+  let planId = data.planId || null;
+  
+  if (planId && !expiresAt) {
+    const plan = await getSubscriptionPlanById(planId);
+    if (plan) {
+      expiresAt = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000);
+    }
+  }
+  
   const values: InsertLicenseKey = {
     licenseKey,
     status: data.status || 'pending',
+    planId: planId,
     assignedTo: data.assignedTo || null,
     assignedEmail: data.assignedEmail || null,
     maxActivations: data.maxActivations || 1,
-    expiresAt: data.expiresAt || null,
+    issuedAt: new Date(),
+    expiresAt: expiresAt,
     notes: data.notes || null,
     createdBy: data.createdBy || null,
   };
@@ -584,14 +598,15 @@ export async function confirmOrder(orderId: number, confirmedBy: number) {
   const plan = await getSubscriptionPlanById(order.planId);
   if (!plan) throw new Error("Plan not found");
 
-  // Generate license key
+  // Generate license key with plan-based expiration
   const license = await createLicenseKey({
     assignedTo: order.customerName,
     assignedEmail: order.customerEmail,
     status: "active",
+    planId: plan.id,
     maxActivations: 1,
     expiresAt: new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000),
-    notes: `Order: ${order.orderNumber}`,
+    notes: `Order: ${order.orderNumber} | Plan: ${plan.name}`,
     createdBy: confirmedBy,
   });
 
@@ -736,4 +751,179 @@ export async function checkAndExpireSubscriptions() {
   }
 
   return expiredSubs.length;
+}
+
+
+// ============ LICENSE EXPIRATION OPERATIONS ============
+
+/**
+ * Check and expire all licenses that have passed their expiration date
+ * This should be called periodically (e.g., via cron job)
+ */
+export async function checkAndExpireLicenses() {
+  const db = await getDb();
+  if (!db) return { expired: 0, removed: 0 };
+
+  const now = new Date();
+  
+  // Find active licenses that have expired
+  const expiredLicenses = await db.select()
+    .from(licenseKeys)
+    .where(and(
+      eq(licenseKeys.status, "active"),
+      sql`${licenseKeys.expiresAt} IS NOT NULL AND ${licenseKeys.expiresAt} < ${now}`
+    ));
+
+  // Mark them as expired
+  for (const license of expiredLicenses) {
+    await db.update(licenseKeys).set({ status: "expired" }).where(eq(licenseKeys.id, license.id));
+  }
+
+  return { expired: expiredLicenses.length, removed: 0 };
+}
+
+/**
+ * Remove expired licenses that have been expired for more than X days
+ * @param daysOld - Number of days after expiration before removal (default: 30)
+ */
+export async function removeOldExpiredLicenses(daysOld: number = 30) {
+  const db = await getDb();
+  if (!db) return { removed: 0 };
+
+  const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+  
+  // Find expired licenses older than cutoff
+  const oldLicenses = await db.select()
+    .from(licenseKeys)
+    .where(and(
+      eq(licenseKeys.status, "expired"),
+      sql`${licenseKeys.expiresAt} IS NOT NULL AND ${licenseKeys.expiresAt} < ${cutoffDate}`
+    ));
+
+  // Delete them
+  for (const license of oldLicenses) {
+    // First delete related records
+    await db.delete(licenseActivations).where(eq(licenseActivations.licenseKeyId, license.id));
+    await db.delete(appStatusReports).where(eq(appStatusReports.licenseKeyId, license.id));
+    // Then delete the license
+    await db.delete(licenseKeys).where(eq(licenseKeys.id, license.id));
+  }
+
+  return { removed: oldLicenses.length };
+}
+
+/**
+ * Get licenses that are about to expire (within X days)
+ * @param days - Number of days until expiration (default: 7)
+ */
+export async function getLicensesExpiringWithin(days: number = 7) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const now = new Date();
+  const futureDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  
+  return db.select()
+    .from(licenseKeys)
+    .where(and(
+      eq(licenseKeys.status, "active"),
+      sql`${licenseKeys.expiresAt} IS NOT NULL AND ${licenseKeys.expiresAt} > ${now} AND ${licenseKeys.expiresAt} < ${futureDate}`
+    ))
+    .orderBy(licenseKeys.expiresAt);
+}
+
+/**
+ * Validate a license key for the Windows application
+ * Returns detailed validation result
+ */
+export async function validateLicenseForApp(key: string, hwid?: string, ipAddress?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const license = await getLicenseKeyByKey(key);
+  
+  if (!license) {
+    return {
+      valid: false,
+      error: "INVALID_KEY",
+      message: "License key not found",
+    };
+  }
+
+  // Check if expired
+  if (license.expiresAt && new Date(license.expiresAt) < new Date()) {
+    // Auto-expire the license
+    await db.update(licenseKeys).set({ status: "expired" }).where(eq(licenseKeys.id, license.id));
+    return {
+      valid: false,
+      error: "EXPIRED",
+      message: "License has expired",
+      expiresAt: license.expiresAt,
+    };
+  }
+
+  // Check status
+  if (license.status === "expired") {
+    return {
+      valid: false,
+      error: "EXPIRED",
+      message: "License has expired",
+      expiresAt: license.expiresAt,
+    };
+  }
+
+  if (license.status === "revoked") {
+    return {
+      valid: false,
+      error: "REVOKED",
+      message: "License has been revoked",
+    };
+  }
+
+  if (license.status === "pending") {
+    return {
+      valid: false,
+      error: "PENDING",
+      message: "License is pending activation",
+    };
+  }
+
+  // Check activation limit
+  if (license.currentActivations >= license.maxActivations) {
+    // If HWID matches, allow
+    if (hwid && license.lastActivatedHwid === hwid) {
+      // Same machine, allow
+    } else {
+      return {
+        valid: false,
+        error: "MAX_ACTIVATIONS",
+        message: "Maximum activations reached",
+        currentActivations: license.currentActivations,
+        maxActivations: license.maxActivations,
+      };
+    }
+  }
+
+  // Get plan info if available
+  let planName = null;
+  if (license.planId) {
+    const plan = await getSubscriptionPlanById(license.planId);
+    planName = plan?.name || null;
+  }
+
+  // License is valid
+  return {
+    valid: true,
+    licenseKey: license.licenseKey,
+    status: license.status,
+    expiresAt: license.expiresAt,
+    daysRemaining: license.expiresAt 
+      ? Math.ceil((new Date(license.expiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+      : null,
+    plan: planName,
+    assignedTo: license.assignedTo,
+    assignedEmail: license.assignedEmail,
+    currentActivations: license.currentActivations,
+    maxActivations: license.maxActivations,
+  };
 }

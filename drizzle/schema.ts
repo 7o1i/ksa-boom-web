@@ -25,11 +25,13 @@ export const licenseKeys = mysqlTable("license_keys", {
   id: int("id").autoincrement().primaryKey(),
   licenseKey: varchar("licenseKey", { length: 64 }).notNull().unique(),
   status: mysqlEnum("status", ["active", "expired", "revoked", "pending"]).default("pending").notNull(),
+  planId: int("planId"), // Links to subscription plan for duration calculation
   assignedTo: varchar("assignedTo", { length: 255 }),
   assignedEmail: varchar("assignedEmail", { length: 320 }),
   maxActivations: int("maxActivations").default(1).notNull(),
   currentActivations: int("currentActivations").default(0).notNull(),
-  expiresAt: timestamp("expiresAt"),
+  issuedAt: timestamp("issuedAt").defaultNow(), // When the license was activated/issued
+  expiresAt: timestamp("expiresAt"), // Calculated from plan duration
   lastActivatedAt: timestamp("lastActivatedAt"),
   lastActivatedIp: varchar("lastActivatedIp", { length: 45 }),
   lastActivatedHwid: varchar("lastActivatedHwid", { length: 128 }),
