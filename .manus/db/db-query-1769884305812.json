@@ -1,0 +1,46 @@
+{
+  "query": "SELECT * FROM subscription_plans;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user grt6LNSoYSrgVpD.root --database hyw6dNpPfwvMbAQcNaKZ5T --execute SELECT * FROM subscription_plans;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Weekly Plan",
+      "duration": "weekly",
+      "durationDays": "7",
+      "price": "18",
+      "currency": "SAR",
+      "features": "[\"Full software access\", \"Color detection\", \"Region selection\", \"Basic support\"]",
+      "isActive": "1",
+      "createdAt": "2026-01-31 18:31:40",
+      "updatedAt": "2026-01-31 18:31:40"
+    },
+    {
+      "id": "2",
+      "name": "Monthly Plan",
+      "duration": "monthly",
+      "durationDays": "30",
+      "price": "55",
+      "currency": "SAR",
+      "features": "[\"Full software access\", \"Color detection\", \"Region selection\", \"Multi-monitor support\", \"Priority support\"]",
+      "isActive": "1",
+      "createdAt": "2026-01-31 18:31:40",
+      "updatedAt": "2026-01-31 18:31:40"
+    },
+    {
+      "id": "3",
+      "name": "Yearly Plan",
+      "duration": "yearly",
+      "durationDays": "365",
+      "price": "290",
+      "currency": "SAR",
+      "features": "[\"Full software access\", \"Color detection\", \"Region selection\", \"Multi-monitor support\", \"Priority support\", \"Free updates\", \"Best value\"]",
+      "isActive": "1",
+      "createdAt": "2026-01-31 18:31:40",
+      "updatedAt": "2026-01-31 18:31:40"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tduration\tdurationDays\tprice\tcurrency\tfeatures\tisActive\tcreatedAt\tupdatedAt\n1\tWeekly Plan\tweekly\t7\t18\tSAR\t[\"Full software access\", \"Color detection\", \"Region selection\", \"Basic support\"]\t1\t2026-01-31 18:31:40\t2026-01-31 18:31:40\n2\tMonthly Plan\tmonthly\t30\t55\tSAR\t[\"Full software access\", \"Color detection\", \"Region selection\", \"Multi-monitor support\", \"Priority support\"]\t1\t2026-01-31 18:31:40\t2026-01-31 18:31:40\n3\tYearly Plan\tyearly\t365\t290\tSAR\t[\"Full software access\", \"Color detection\", \"Region selection\", \"Multi-monitor support\", \"Priority support\", \"Free updates\", \"Best value\"]\t1\t2026-01-31 18:31:40\t2026-01-31 18:31:40\n",
+  "stderr": "",
+  "execution_time_ms": 1514
+}

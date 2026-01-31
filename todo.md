@@ -98,3 +98,6 @@
 - [x] All API endpoints secure
 - [ ] Upload Windows .exe file to S3 (user action required)
 - [ ] Configure custom domain (user action in Settings)
+
+## Bug Fixes
+- [x] Fix subscription plans not appearing on Pricing page (added plans to database)
