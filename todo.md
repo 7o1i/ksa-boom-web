@@ -101,3 +101,4 @@
 
 ## Bug Fixes
 - [x] Fix subscription plans not appearing on Pricing page (added plans to database)
+- [x] Fix incomplete translations - add all missing translation keys for all pages

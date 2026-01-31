@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Download as DownloadIcon, 
   ArrowLeft, 
@@ -31,21 +30,20 @@ export default function Download() {
     message: string;
     expiresAt?: Date;
   } | null>(null);
-  const [showActivateDialog, setShowActivateDialog] = useState(false);
 
   const trackDownloadMutation = trpc.api.trackDownload.useMutation();
   const validateLicenseMutation = trpc.api.validateLicense.useMutation({
     onSuccess: (data) => {
       setValidationResult({
         valid: true,
-        message: "License key is valid!",
+        message: t('download.licenseValid'),
         expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
       });
     },
     onError: (error) => {
       setValidationResult({
         valid: false,
-        message: error.message || "Invalid license key",
+        message: error.message || t('download.licenseInvalid'),
       });
     },
     onSettled: () => {
@@ -54,15 +52,8 @@ export default function Download() {
   });
 
   const handleDownload = async () => {
-    // Track the download
     trackDownloadMutation.mutate({ appVersion: "1.0.0" });
-    
-    // For now, show a message about the download
-    // In production, this would link to the actual .exe file in S3
     toast.info("Download will start shortly. The application requires a valid license key to run.");
-    
-    // Simulate download start - in production, redirect to S3 URL
-    // window.location.href = "https://your-s3-bucket.s3.amazonaws.com/KSABoom-v1.0.0.exe";
   };
 
   const handleValidateLicense = async (e: React.FormEvent) => {
@@ -80,12 +71,10 @@ export default function Download() {
   };
 
   const systemRequirements = [
-    { label: "Operating System", value: "Windows 10/11 (64-bit)" },
-    { label: "Processor", value: "Intel Core i3 or equivalent" },
-    { label: "Memory", value: "4 GB RAM minimum" },
-    { label: "Storage", value: "100 MB available space" },
-    { label: "Display", value: "1280x720 resolution minimum" },
-    { label: "Other", value: "Internet connection for license validation" },
+    { label: t('download.os'), value: t('download.osValue') },
+    { label: t('download.processor'), value: t('download.processorValue') },
+    { label: t('download.memory'), value: t('download.memoryValue') },
+    { label: t('download.storage'), value: t('download.storageValue') },
   ];
 
   return (
@@ -107,7 +96,7 @@ export default function Download() {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
+                {t('nav.backToHome')}
               </Button>
             </Link>
           </div>
@@ -118,14 +107,14 @@ export default function Download() {
       <main className="container pt-32 pb-20">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4 border-primary/50 text-primary">
-            DOWNLOAD CENTER
+            {t('nav.download').toUpperCase()}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            <span className="neon-text-gold">Download</span>{" "}
-            <span className="text-secondary">KSA,Boom</span>
+            <span className="neon-text-gold">{t('download.title').split(' ')[0]}</span>{" "}
+            <span className="text-secondary">{t('download.title').split(' ').slice(1).join(' ')}</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Get the latest version of KSA,Boom for Windows. A valid license key is required to use the application.
+            {t('download.subtitle')}
           </p>
         </div>
 
@@ -137,14 +126,14 @@ export default function Download() {
                 <DownloadIcon className="h-6 w-6 text-primary" />
                 KSA,Boom for Windows
               </CardTitle>
-              <CardDescription>Version 1.0.0 • Released January 2026</CardDescription>
+              <CardDescription>{t('download.version')} 1.0.0</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border border-border/50">
                 <Monitor className="h-12 w-12 text-primary" />
                 <div>
-                  <p className="font-semibold">Windows Application</p>
-                  <p className="text-sm text-muted-foreground">64-bit executable • ~25 MB</p>
+                  <p className="font-semibold">{t('download.platform')}: Windows</p>
+                  <p className="text-sm text-muted-foreground">64-bit • ~25 MB</p>
                 </div>
               </div>
 
@@ -159,7 +148,7 @@ export default function Download() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Key className="h-4 w-4 text-secondary" />
-                  <span>License key required for activation</span>
+                  <span>License key required</span>
                 </div>
               </div>
 
@@ -169,12 +158,8 @@ export default function Download() {
                 onClick={handleDownload}
               >
                 <DownloadIcon className="h-5 w-5 mr-2" />
-                Download for Windows
+                {t('download.downloadNow')}
               </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                By downloading, you agree to our Terms of Service and Privacy Policy
-              </p>
             </CardContent>
           </Card>
 
@@ -183,14 +168,14 @@ export default function Download() {
             <CardHeader>
               <CardTitle className="font-display flex items-center gap-2">
                 <Key className="h-6 w-6 text-secondary" />
-                Validate License Key
+                {t('download.validateLicense')}
               </CardTitle>
-              <CardDescription>Check if your license key is valid and active</CardDescription>
+              <CardDescription>{t('download.enterLicenseKey')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleValidateLicense} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="licenseKey">License Key</Label>
+                  <Label htmlFor="licenseKey">{t('license.licenseKey')}</Label>
                   <Input
                     id="licenseKey"
                     placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
@@ -209,10 +194,10 @@ export default function Download() {
                   {isValidating ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Validating...
+                      {t('download.validating')}
                     </>
                   ) : (
-                    "Validate License"
+                    t('download.validate')
                   )}
                 </Button>
 
@@ -234,7 +219,7 @@ export default function Download() {
                     </div>
                     {validationResult.valid && validationResult.expiresAt && (
                       <p className="text-sm text-muted-foreground mt-2">
-                        Expires: {validationResult.expiresAt.toLocaleDateString()}
+                        {t('download.expiresOn')}: {validationResult.expiresAt.toLocaleDateString()}
                       </p>
                     )}
                   </div>
@@ -243,11 +228,11 @@ export default function Download() {
 
               <div className="mt-6 pt-6 border-t border-border/50">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Don't have a license key?
+                  {t('download.noLicense')}
                 </p>
                 <Link href="/pricing">
                   <Button variant="outline" className="w-full">
-                    View Subscription Plans
+                    {t('download.getPlan')}
                   </Button>
                 </Link>
               </div>
@@ -258,7 +243,7 @@ export default function Download() {
         {/* System Requirements */}
         <Card className="max-w-5xl mx-auto mt-8 border-border/50 bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle className="font-display">System Requirements</CardTitle>
+            <CardTitle className="font-display">{t('download.requirements')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
@@ -275,36 +260,32 @@ export default function Download() {
         {/* Installation Guide */}
         <Card className="max-w-5xl mx-auto mt-8 border-border/50 bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle className="font-display">Installation Guide</CardTitle>
+            <CardTitle className="font-display">{t('download.installation')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-4">
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">1</span>
                 <div>
-                  <p className="font-medium">Download the installer</p>
-                  <p className="text-sm text-muted-foreground">Click the download button above to get the latest version</p>
+                  <p className="font-medium">{t('download.step1')}</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">2</span>
                 <div>
-                  <p className="font-medium">Run the installer</p>
-                  <p className="text-sm text-muted-foreground">Double-click the downloaded .exe file and follow the installation wizard</p>
+                  <p className="font-medium">{t('download.step2')}</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">3</span>
                 <div>
-                  <p className="font-medium">Enter your license key</p>
-                  <p className="text-sm text-muted-foreground">When prompted, enter the license key you received via email</p>
+                  <p className="font-medium">{t('download.step3')}</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">4</span>
                 <div>
-                  <p className="font-medium">Start using KSA,Boom</p>
-                  <p className="text-sm text-muted-foreground">Once activated, you can start using all the features</p>
+                  <p className="font-medium">{t('download.step4')}</p>
                 </div>
               </li>
             </ol>

@@ -24,7 +24,7 @@ export default function Pricing() {
   const createOrderMutation = trpc.orders.create.useMutation({
     onSuccess: (data) => {
       setOrderComplete(data);
-      toast.success("Order placed successfully!");
+      toast.success(t('pricing.orderPlaced'));
     },
     onError: (error) => {
       toast.error(error.message || "Failed to place order");
@@ -65,6 +65,24 @@ export default function Pricing() {
     }
   };
 
+  const getPlanName = (duration: string) => {
+    switch (duration) {
+      case "weekly": return t('pricing.weekly');
+      case "monthly": return t('pricing.monthly');
+      case "yearly": return t('pricing.yearly');
+      default: return duration;
+    }
+  };
+
+  const getPlanDesc = (duration: string) => {
+    switch (duration) {
+      case "weekly": return t('pricing.weeklyDesc');
+      case "monthly": return t('pricing.monthlyDesc');
+      case "yearly": return t('pricing.yearlyDesc');
+      default: return duration;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background cyber-grid">
       {/* Navigation */}
@@ -84,7 +102,7 @@ export default function Pricing() {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
+                {t('nav.backToHome')}
               </Button>
             </Link>
           </div>
@@ -95,14 +113,14 @@ export default function Pricing() {
       <main className="container pt-32 pb-20">
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4 border-primary/50 text-primary">
-            SUBSCRIPTION PLANS
+            {t('pricing.badge')}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            <span className="neon-text-gold">Choose</span>{" "}
-            <span className="text-secondary">Your Plan</span>
+            <span className="neon-text-gold">{t('pricing.title').split(' ')[0]}</span>{" "}
+            <span className="text-secondary">{t('pricing.title').split(' ').slice(1).join(' ')}</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Select the subscription that fits your needs. All plans include full access to KSA,Boom features.
+            {t('pricing.subtitle')}
           </p>
         </div>
 
@@ -122,7 +140,7 @@ export default function Pricing() {
                 {plan.duration === "monthly" && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground">
-                      Most Popular
+                      {t('pricing.mostPopular')}
                     </Badge>
                   </div>
                 )}
@@ -130,8 +148,8 @@ export default function Pricing() {
                   <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     {getPlanIcon(plan.duration)}
                   </div>
-                  <CardTitle className="font-display text-2xl">{plan.name}</CardTitle>
-                  <CardDescription className="capitalize">{plan.duration} subscription</CardDescription>
+                  <CardTitle className="font-display text-2xl">{getPlanName(plan.duration)}</CardTitle>
+                  <CardDescription>{getPlanDesc(plan.duration)}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
                   <div className="mb-6">
@@ -153,7 +171,7 @@ export default function Pricing() {
                     size="lg"
                     onClick={() => handleSelectPlan(plan.id)}
                   >
-                    Get Started
+                    {t('pricing.getStarted')}
                   </Button>
                 </CardFooter>
               </Card>
@@ -165,15 +183,14 @@ export default function Pricing() {
         <div className="mt-16 text-center">
           <Card className="max-w-2xl mx-auto border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
-              <CardTitle className="font-display">Payment Information</CardTitle>
+              <CardTitle className="font-display">{t('pricing.paymentInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground">
               <p className="mb-4">
-                After placing your order, our team will contact you via email to verify payment. 
-                Once confirmed, your license key will be generated and sent to your email address.
+                {t('pricing.paymentDesc')}
               </p>
               <p className="text-sm">
-                For payment inquiries, contact us at: <span className="text-primary">hack1pro6@gmail.com</span>
+                {t('pricing.contactEmail')} <span className="text-primary">hack1pro6@gmail.com</span>
               </p>
             </CardContent>
           </Card>
@@ -186,24 +203,28 @@ export default function Pricing() {
           {orderComplete ? (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display text-primary">Order Placed Successfully!</DialogTitle>
+                <DialogTitle className="font-display text-primary">{t('pricing.orderPlaced')}</DialogTitle>
                 <DialogDescription>
-                  Your order has been received and is pending confirmation.
+                  {t('pricing.orderConfirmation')}
                 </DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-4">
                 <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                  <p className="text-sm text-muted-foreground mb-1">Order Number</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('pricing.orderNumber')}</p>
                   <p className="font-mono text-lg font-bold text-primary">{orderComplete.orderNumber}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                  <p className="text-sm text-muted-foreground mb-1">Amount</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('orders.amount')}</p>
                   <p className="text-lg font-bold">{orderComplete.amount} {orderComplete.currency}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  We will contact you at <span className="text-primary">{customerEmail}</span> to verify payment. 
-                  Once confirmed, your license key will be sent to this email.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">{t('pricing.whatNext')}</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>1. {t('pricing.step1')}</li>
+                    <li>2. {t('pricing.step2')}</li>
+                    <li>3. {t('pricing.step3')}</li>
+                  </ul>
+                </div>
               </div>
               <DialogFooter>
                 <Button onClick={() => {
@@ -212,39 +233,36 @@ export default function Pricing() {
                   setCustomerEmail("");
                   setCustomerName("");
                 }}>
-                  Close
+                  {t('pricing.close')}
                 </Button>
               </DialogFooter>
             </>
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display">Complete Your Order</DialogTitle>
+                <DialogTitle className="font-display">{t('pricing.placeOrder')}</DialogTitle>
                 <DialogDescription>
-                  Enter your details to place your order. We'll contact you to verify payment.
+                  {t('pricing.paymentDesc')}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmitOrder}>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email Address *</Label>
+                    <Label htmlFor="email">{t('pricing.yourEmail')} *</Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder={t('pricing.enterEmail')}
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
                       required
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Your license key will be sent to this email
-                    </p>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Full Name (Optional)</Label>
+                    <Label htmlFor="name">{t('pricing.yourName')}</Label>
                     <Input
                       id="name"
-                      placeholder="Your name"
+                      placeholder={t('pricing.enterName')}
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                     />
@@ -252,16 +270,16 @@ export default function Pricing() {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={createOrderMutation.isPending || !customerEmail}>
                     {createOrderMutation.isPending ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Processing...
+                        {t('pricing.processing')}
                       </>
                     ) : (
-                      "Place Order"
+                      t('pricing.placeOrder')
                     )}
                   </Button>
                 </DialogFooter>
