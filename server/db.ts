@@ -430,3 +430,310 @@ export async function getDashboardStats() {
     security: securityStats,
   };
 }
+
+
+// ============ SUBSCRIPTION PLAN OPERATIONS ============
+
+import { 
+  subscriptionPlans, InsertSubscriptionPlan, SubscriptionPlan,
+  orders, InsertOrder, Order,
+  subscriptions, InsertSubscription, Subscription
+} from "../drizzle/schema";
+
+export async function getSubscriptionPlans(activeOnly = true) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  if (activeOnly) {
+    return db.select().from(subscriptionPlans).where(eq(subscriptionPlans.isActive, true));
+  }
+  return db.select().from(subscriptionPlans);
+}
+
+export async function getSubscriptionPlanById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [result] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id)).limit(1);
+  return result || null;
+}
+
+export async function createSubscriptionPlan(data: InsertSubscriptionPlan) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(subscriptionPlans).values(data);
+}
+
+export async function initializeDefaultPlans() {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await db.select().from(subscriptionPlans).limit(1);
+  if (existing.length > 0) return;
+
+  const defaultPlans: InsertSubscriptionPlan[] = [
+    {
+      name: "Weekly Plan",
+      duration: "weekly",
+      durationDays: 7,
+      price: 18,
+      currency: "SAR",
+      features: JSON.stringify(["Full access to all features", "Color detection", "Multi-monitor support", "Email support"]),
+      isActive: true,
+    },
+    {
+      name: "Monthly Plan",
+      duration: "monthly",
+      durationDays: 30,
+      price: 55,
+      currency: "SAR",
+      features: JSON.stringify(["Full access to all features", "Color detection", "Multi-monitor support", "Priority email support", "Free updates"]),
+      isActive: true,
+    },
+    {
+      name: "Yearly Plan",
+      duration: "yearly",
+      durationDays: 365,
+      price: 290,
+      currency: "SAR",
+      features: JSON.stringify(["Full access to all features", "Color detection", "Multi-monitor support", "Priority support", "Free updates", "2 months free"]),
+      isActive: true,
+    },
+  ];
+
+  for (const plan of defaultPlans) {
+    await db.insert(subscriptionPlans).values(plan);
+  }
+}
+
+// ============ ORDER OPERATIONS ============
+
+function generateOrderNumber(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = nanoid(6).toUpperCase();
+  return `KSA-${timestamp}-${random}`;
+}
+
+export async function createOrder(data: { customerEmail: string; customerName?: string; planId: number; paymentMethod?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const plan = await getSubscriptionPlanById(data.planId);
+  if (!plan) throw new Error("Invalid subscription plan");
+
+  const orderNumber = generateOrderNumber();
+  const values: InsertOrder = {
+    orderNumber,
+    customerEmail: data.customerEmail,
+    customerName: data.customerName || null,
+    planId: data.planId,
+    amount: plan.price,
+    currency: plan.currency,
+    status: "pending",
+    paymentMethod: data.paymentMethod || null,
+  };
+
+  await db.insert(orders).values(values);
+  
+  // Return the created order
+  const [created] = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
+  return created;
+}
+
+export async function getOrders(limit = 100, offset = 0, status?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  if (status) {
+    return db.select()
+      .from(orders)
+      .where(eq(orders.status, status as any))
+      .orderBy(desc(orders.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  return db.select().from(orders).orderBy(desc(orders.createdAt)).limit(limit).offset(offset);
+}
+
+export async function getOrderById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [result] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+  return result || null;
+}
+
+export async function getOrderByNumber(orderNumber: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [result] = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
+  return result || null;
+}
+
+export async function confirmOrder(orderId: number, confirmedBy: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const order = await getOrderById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "pending") throw new Error("Order is not pending");
+
+  const plan = await getSubscriptionPlanById(order.planId);
+  if (!plan) throw new Error("Plan not found");
+
+  // Generate license key
+  const license = await createLicenseKey({
+    assignedTo: order.customerName,
+    assignedEmail: order.customerEmail,
+    status: "active",
+    maxActivations: 1,
+    expiresAt: new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000),
+    notes: `Order: ${order.orderNumber}`,
+    createdBy: confirmedBy,
+  });
+
+  // Get the license ID
+  const licenseRecord = await getLicenseKeyByKey(license.licenseKey);
+  if (!licenseRecord) throw new Error("Failed to create license");
+
+  // Update order status
+  await db.update(orders).set({
+    status: "confirmed",
+    confirmedBy,
+    confirmedAt: new Date(),
+    licenseKeyId: licenseRecord.id,
+  }).where(eq(orders.id, orderId));
+
+  // Create subscription record
+  const startDate = new Date();
+  const endDate = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000);
+  
+  await db.insert(subscriptions).values({
+    orderId: order.id,
+    licenseKeyId: licenseRecord.id,
+    planId: plan.id,
+    customerEmail: order.customerEmail,
+    status: "active",
+    startDate,
+    endDate,
+    autoRenew: false,
+  });
+
+  return {
+    order: await getOrderById(orderId),
+    license: licenseRecord,
+  };
+}
+
+export async function cancelOrder(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(orders).set({ status: "cancelled" }).where(eq(orders.id, orderId));
+}
+
+export async function getOrderStats() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [total] = await db.select({ count: count() }).from(orders);
+  const [pending] = await db.select({ count: count() }).from(orders).where(eq(orders.status, "pending"));
+  const [confirmed] = await db.select({ count: count() }).from(orders).where(eq(orders.status, "confirmed"));
+  
+  // Calculate revenue from confirmed orders
+  const confirmedOrders = await db.select().from(orders).where(eq(orders.status, "confirmed"));
+  const totalRevenue = confirmedOrders.reduce((sum, order) => sum + order.amount, 0);
+
+  return {
+    total: total?.count || 0,
+    pending: pending?.count || 0,
+    confirmed: confirmed?.count || 0,
+    totalRevenue,
+  };
+}
+
+// ============ SUBSCRIPTION OPERATIONS ============
+
+export async function getSubscriptions(limit = 100, offset = 0, status?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  if (status) {
+    return db.select()
+      .from(subscriptions)
+      .where(eq(subscriptions.status, status as any))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  return db.select().from(subscriptions).orderBy(desc(subscriptions.createdAt)).limit(limit).offset(offset);
+}
+
+export async function getSubscriptionByLicenseId(licenseKeyId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [result] = await db.select().from(subscriptions).where(eq(subscriptions.licenseKeyId, licenseKeyId)).limit(1);
+  return result || null;
+}
+
+export async function expireSubscription(subscriptionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.id, subscriptionId)).limit(1);
+  if (!sub) throw new Error("Subscription not found");
+
+  // Update subscription status
+  await db.update(subscriptions).set({ status: "expired" }).where(eq(subscriptions.id, subscriptionId));
+
+  // Update license status
+  await db.update(licenseKeys).set({ status: "expired" }).where(eq(licenseKeys.id, sub.licenseKeyId));
+}
+
+export async function extendSubscription(subscriptionId: number, additionalDays: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.id, subscriptionId)).limit(1);
+  if (!sub) throw new Error("Subscription not found");
+
+  const newEndDate = new Date(sub.endDate.getTime() + additionalDays * 24 * 60 * 60 * 1000);
+  
+  // Update subscription
+  await db.update(subscriptions).set({ 
+    endDate: newEndDate,
+    status: "active" 
+  }).where(eq(subscriptions.id, subscriptionId));
+
+  // Update license expiration
+  await db.update(licenseKeys).set({ 
+    expiresAt: newEndDate,
+    status: "active"
+  }).where(eq(licenseKeys.id, sub.licenseKeyId));
+}
+
+export async function checkAndExpireSubscriptions() {
+  const db = await getDb();
+  if (!db) return;
+
+  const now = new Date();
+  
+  // Find active subscriptions that have expired
+  const expiredSubs = await db.select()
+    .from(subscriptions)
+    .where(and(
+      eq(subscriptions.status, "active"),
+      sql`${subscriptions.endDate} < ${now}`
+    ));
+
+  for (const sub of expiredSubs) {
+    await expireSubscription(sub.id);
+  }
+
+  return expiredSubs.length;
+}

@@ -153,3 +153,68 @@ export const appSettings = mysqlTable("app_settings", {
 
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertAppSetting = typeof appSettings.$inferInsert;
+
+
+/**
+ * Subscription plans configuration
+ */
+export const subscriptionPlans = mysqlTable("subscription_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 64 }).notNull(),
+  duration: mysqlEnum("duration", ["weekly", "monthly", "yearly"]).notNull(),
+  durationDays: int("durationDays").notNull(),
+  price: int("price").notNull(), // Price in SAR (smallest unit)
+  currency: varchar("currency", { length: 3 }).default("SAR").notNull(),
+  features: text("features"), // JSON array of features
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
+
+/**
+ * Customer orders/purchases
+ */
+export const orders = mysqlTable("orders", {
+  id: int("id").autoincrement().primaryKey(),
+  orderNumber: varchar("orderNumber", { length: 32 }).notNull().unique(),
+  customerEmail: varchar("customerEmail", { length: 320 }).notNull(),
+  customerName: varchar("customerName", { length: 255 }),
+  planId: int("planId").notNull(),
+  amount: int("amount").notNull(), // Amount in SAR
+  currency: varchar("currency", { length: 3 }).default("SAR").notNull(),
+  status: mysqlEnum("status", ["pending", "confirmed", "cancelled", "refunded"]).default("pending").notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 64 }),
+  paymentReference: varchar("paymentReference", { length: 255 }),
+  notes: text("notes"),
+  confirmedBy: int("confirmedBy"),
+  confirmedAt: timestamp("confirmedAt"),
+  licenseKeyId: int("licenseKeyId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof orders.$inferInsert;
+
+/**
+ * Customer subscriptions (active subscriptions linked to licenses)
+ */
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  licenseKeyId: int("licenseKeyId").notNull(),
+  planId: int("planId").notNull(),
+  customerEmail: varchar("customerEmail", { length: 320 }).notNull(),
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active").notNull(),
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate").notNull(),
+  autoRenew: boolean("autoRenew").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;

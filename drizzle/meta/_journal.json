@@ -15,6 +15,13 @@
       "when": 1769812627524,
       "tag": "0001_regular_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769883440428,
+      "tag": "0002_motionless_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

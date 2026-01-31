@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Key, Shield, Settings, Home } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Key, Shield, Settings, Home, ShoppingCart } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -163,6 +163,7 @@ function AdminLayoutContent({
   
   const menuItems = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: "/admin" },
+    { icon: ShoppingCart, label: "Orders", path: "/admin/orders" },
     { icon: Key, label: t('nav.licenses'), path: "/admin/licenses" },
     { icon: Shield, label: t('nav.security'), path: "/admin/security" },
     { icon: Settings, label: t('nav.settings'), path: "/admin/settings" },

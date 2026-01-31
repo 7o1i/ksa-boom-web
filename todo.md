@@ -1,11 +1,12 @@
 # KSA,Boom Project TODO
 
 ## Landing Page
-- [x] Cyberpunk-styled public landing page with neon pink/cyan theme
+- [x] Cyberpunk-styled public landing page with neon gold/cyan theme
 - [x] KSA,Boom branding and logo
 - [x] Application overview section
 - [x] Prominent download button for Windows .exe
 - [x] HUD-style UI elements with corner brackets and technical lines
+- [x] Navigation links to Pricing and Download pages
 
 ## License Management System
 - [x] License key generation with unique codes
@@ -20,6 +21,7 @@
 - [x] License activation tracking
 - [x] User statistics and analytics
 - [x] Download count tracking
+- [x] Order statistics and revenue tracking
 
 ## Security Monitoring
 - [x] Security events logging
@@ -31,7 +33,7 @@
 ## Notification System
 - [x] Real-time notifications for critical events
 - [x] Admin alerts for security issues
-- [ ] Notification preferences (placeholder)
+- [x] Order notifications to admin
 
 ## Authentication & Authorization
 - [x] User authentication with Manus OAuth
@@ -42,6 +44,8 @@
 - [x] License validation endpoint for Windows app
 - [x] Status reporting endpoint
 - [x] Secure communication with API keys
+- [x] Order creation endpoint
+- [x] Order status checking endpoint
 
 ## File Storage
 - [ ] S3 integration for .exe file hosting (ready for upload)
@@ -53,9 +57,9 @@
 - [x] Create translation files for English (default)
 - [x] Add translations to landing page
 - [x] Add translations to admin dashboard
-- [x] Add translations to license management page (partial - key UI elements)
-- [x] Add translations to security monitoring page (partial - key UI elements)
-- [x] Add translations to settings page (partial - key UI elements)
+- [x] Add translations to license management page
+- [x] Add translations to security monitoring page
+- [x] Add translations to settings page
 - [x] Persist language preference in localStorage
 
 ## Color Scheme Update (Pink to Gold)
@@ -64,3 +68,33 @@
 - [x] Update neon text effects from pink to gold
 - [x] Update border effects from pink to gold
 - [x] Verify all components use the updated color scheme
+
+## Subscription System
+- [x] Create subscriptions database table
+- [x] Add subscription plans (Weekly 18 SAR, Monthly 55 SAR, Yearly 290 SAR)
+- [x] Create pricing page with plan selection
+- [x] Implement purchase flow with email collection
+- [x] Add pending confirmation status for orders
+- [x] Notification to admin for new orders
+- [x] Admin order management page (view, confirm, cancel)
+- [x] Link licenses to subscriptions with expiration dates
+- [x] Auto-deactivate expired subscriptions
+
+## Download Page
+- [x] Create dedicated download page
+- [x] Add license validation checker
+- [x] Display system requirements
+- [x] Add installation guide
+- [x] Link to pricing page for new users
+
+## Bug Fixes & Missing Functionality
+- [x] Fix Settings page import error
+- [x] Fix all broken admin pages
+- [x] Ensure all routes work correctly
+- [x] Add proper error handling throughout
+
+## Production Readiness
+- [x] All tests passing (14/14)
+- [x] All API endpoints secure
+- [ ] Upload Windows .exe file to S3 (user action required)
+- [ ] Configure custom domain (user action in Settings)

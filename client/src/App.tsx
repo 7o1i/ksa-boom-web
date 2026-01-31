@@ -6,17 +6,23 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Home from "./pages/Home";
+import Pricing from "./pages/Pricing";
+import Download from "./pages/Download";
 import AdminDashboard from "./pages/admin/Dashboard";
 import LicenseManagement from "./pages/admin/Licenses";
 import SecurityMonitor from "./pages/admin/Security";
 import AdminSettings from "./pages/admin/Settings";
+import AdminOrders from "./pages/admin/Orders";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/download" component={Download} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/licenses" component={LicenseManagement} />
+      <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/security" component={SecurityMonitor} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/404" component={NotFound} />

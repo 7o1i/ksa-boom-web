@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Download, Shield, Zap, Target, Eye, Settings, ChevronRight, Monitor, Lock, Activity } from "lucide-react";
+import { Download, Shield, Zap, Target, Eye, Settings, ChevronRight, Monitor, Lock, Activity, CreditCard } from "lucide-react";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -24,22 +24,34 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded border-2 border-primary flex items-center justify-center neon-border-pink">
-              <span className="font-display font-bold text-lg neon-text-pink">K</span>
+            <div className="w-10 h-10 rounded border-2 border-primary flex items-center justify-center neon-border-gold">
+              <span className="font-display font-bold text-lg neon-text-gold">K</span>
             </div>
             <span className="font-display text-xl font-bold tracking-wider">
-              <span className="neon-text-pink">KSA</span>
+              <span className="neon-text-gold">KSA</span>
               <span className="text-muted-foreground">,</span>
               <span className="neon-text-cyan">Boom</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <CreditCard className="w-4 h-4 mr-2" />
+                Pricing
+              </Button>
+            </Link>
+            <Link href="/download">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </Link>
             <LanguageSwitcher variant="compact" />
             {isAuthenticated ? (
               <>
                 {user?.role === 'admin' && (
                   <Link href="/admin">
-                    <Button variant="outline" className="border-primary/50 hover:border-primary hover:neon-border-pink">
+                    <Button variant="outline" className="border-primary/50 hover:border-primary hover:neon-border-gold">
                       <Shield className="w-4 h-4 mr-2" />
                       {t('nav.adminPanel')}
                     </Button>
@@ -85,7 +97,7 @@ export default function Home() {
               </div>
               
               <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 tracking-wider">
-                <span className="neon-text-pink neon-flicker">KSA</span>
+                <span className="neon-text-gold neon-flicker">KSA</span>
                 <span className="text-muted-foreground">,</span>
                 <span className="neon-text-cyan">Boom</span>
               </h1>
@@ -101,7 +113,7 @@ export default function Home() {
               <Button 
                 size="lg" 
                 onClick={handleDownload}
-                className="relative group px-8 py-6 text-lg font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-pink transition-all duration-300"
+                className="relative group px-8 py-6 text-lg font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-gold transition-all duration-300"
               >
                 <Download className="w-5 h-5 mr-2" />
                 {t('landing.download')}
@@ -193,9 +205,9 @@ export default function Home() {
             <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-secondary" />
             <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-secondary" />
             
-            <Activity className="w-12 h-12 mx-auto mb-4 text-primary neon-text-pink" />
+            <Activity className="w-12 h-12 mx-auto mb-4 text-primary neon-text-gold" />
             <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
-              {t('landing.cta.title').split('Dominate')[0]}<span className="neon-text-pink">Dominate</span>?
+              {t('landing.cta.title').split('Dominate')[0]}<span className="neon-text-gold">Dominate</span>?
             </h2>
             <p className="text-muted-foreground mb-6">
               {t('landing.cta.subtitle')}
@@ -203,7 +215,7 @@ export default function Home() {
             <Button 
               size="lg" 
               onClick={handleDownload}
-              className="font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-pink"
+              className="font-display font-bold tracking-wider bg-primary hover:bg-primary/90 neon-glow-gold"
             >
               <Download className="w-5 h-5 mr-2" />
               {t('landing.cta.button')}
@@ -218,9 +230,9 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <span className="font-display text-lg font-bold">
-                <span className="neon-text-pink">KSA</span>
-                <span className="text-muted-foreground">,</span>
-                <span className="neon-text-cyan">Boom</span>
+<span className="neon-text-gold">KSA</span>
+              <span className="text-muted-foreground">,</span>
+              <span className="neon-text-cyan">Boom</span>
               </span>
             </div>
             <p className="text-sm text-muted-foreground">

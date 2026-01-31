@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Key, Download, Shield, Activity, AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
+import { Key, Download, Shield, Activity, AlertTriangle, CheckCircle, Clock, Users, ShoppingCart, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
             icon={<Key className="h-5 w-5" />}
             description={`${stats?.licenses.active || 0} ${t('dashboard.active').toLowerCase()}`}
             isLoading={isLoading}
-            accent="pink"
+            accent="gold"
           />
           <StatsCard
             title={t('dashboard.downloads')}
@@ -52,14 +52,14 @@ export default function AdminDashboard() {
             icon={<Shield className="h-5 w-5" />}
             description={`${stats?.security.critical || 0} ${t('dashboard.critical')}`}
             isLoading={isLoading}
-            accent="pink"
+            accent="gold"
             alert={stats?.security.critical ? stats.security.critical > 0 : false}
           />
           <StatsCard
-            title={t('dashboard.last24hEvents')}
-            value={stats?.security.last24h}
-            icon={<Activity className="h-5 w-5" />}
-            description={t('dashboard.securityEventsLabel')}
+            title="Pending Orders"
+            value={stats?.orders?.pending}
+            icon={<ShoppingCart className="h-5 w-5" />}
+            description={`${stats?.orders?.totalRevenue || 0} SAR revenue`}
             isLoading={isLoading}
             accent="cyan"
           />
@@ -223,17 +223,17 @@ function StatsCard({
   icon: React.ReactNode;
   description: string;
   isLoading: boolean;
-  accent: 'pink' | 'cyan';
+  accent: 'gold' | 'cyan';
   alert?: boolean;
 }) {
-  const borderClass = accent === 'pink' ? 'border-primary/30 hover:border-primary/50' : 'border-secondary/30 hover:border-secondary/50';
-  const iconClass = accent === 'pink' ? 'text-primary' : 'text-secondary';
+  const borderClass = accent === 'gold' ? 'border-primary/30 hover:border-primary/50' : 'border-secondary/30 hover:border-secondary/50';
+  const iconClass = accent === 'gold' ? 'text-primary' : 'text-secondary';
 
   return (
     <Card className={`relative border bg-card/50 transition-colors ${borderClass} ${alert ? 'border-destructive/50' : ''}`}>
       {/* Corner accent */}
-      <div className={`absolute top-0 left-0 w-3 h-3 border-t border-l ${accent === 'pink' ? 'border-primary/50' : 'border-secondary/50'}`} />
-      <div className={`absolute bottom-0 right-0 w-3 h-3 border-b border-r ${accent === 'pink' ? 'border-primary/50' : 'border-secondary/50'}`} />
+      <div className={`absolute top-0 left-0 w-3 h-3 border-t border-l ${accent === 'gold' ? 'border-primary/50' : 'border-secondary/50'}`} />
+      <div className={`absolute bottom-0 right-0 w-3 h-3 border-b border-r ${accent === 'gold' ? 'border-primary/50' : 'border-secondary/50'}`} />
       
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
@@ -243,7 +243,7 @@ function StatsCard({
         {isLoading ? (
           <Skeleton className="h-8 w-20" />
         ) : (
-          <div className={`font-display text-3xl font-bold ${accent === 'pink' ? 'text-primary' : 'text-secondary'}`}>
+          <div className={`font-display text-3xl font-bold ${accent === 'gold' ? 'text-primary' : 'text-secondary'}`}>
             {value ?? 0}
           </div>
         )}

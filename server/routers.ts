@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
+import { notifyOwner } from "./_core/notification";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -23,6 +24,153 @@ export const appRouter = router({
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
+    }),
+  }),
+
+  // Subscription Plans (Public)
+  plans: router({
+    list: publicProcedure.query(async () => {
+      return db.getSubscriptionPlans(true);
+    }),
+    
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getSubscriptionPlanById(input.id);
+      }),
+  }),
+
+  // Orders (Public for creating, Admin for managing)
+  orders: router({
+    // Public: Create a new order
+    create: publicProcedure
+      .input(z.object({
+        customerEmail: z.string().email(),
+        customerName: z.string().optional(),
+        planId: z.number(),
+        paymentMethod: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const order = await db.createOrder(input);
+        
+        // Get plan details
+        const plan = await db.getSubscriptionPlanById(input.planId);
+        
+        // Send notification to admin
+        await notifyOwner({
+          title: `New Order: ${order.orderNumber}`,
+          content: `New subscription order received!\n\nOrder: ${order.orderNumber}\nCustomer: ${input.customerName || 'N/A'}\nEmail: ${input.customerEmail}\nPlan: ${plan?.name || 'Unknown'}\nAmount: ${order.amount} ${order.currency}\n\nPlease verify payment and confirm the order in the admin dashboard.`,
+        });
+
+        // Create notification for admin dashboard
+        await db.createNotification({
+          type: 'license',
+          title: 'New Order Received',
+          message: `Order ${order.orderNumber} from ${input.customerEmail} for ${plan?.name || 'Unknown Plan'}`,
+        });
+
+        return {
+          orderNumber: order.orderNumber,
+          amount: order.amount,
+          currency: order.currency,
+          status: order.status,
+        };
+      }),
+
+    // Public: Check order status
+    status: publicProcedure
+      .input(z.object({ orderNumber: z.string() }))
+      .query(async ({ input }) => {
+        const order = await db.getOrderByNumber(input.orderNumber);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Order not found' });
+        }
+        return {
+          orderNumber: order.orderNumber,
+          status: order.status,
+          createdAt: order.createdAt,
+        };
+      }),
+
+    // Admin: List all orders
+    list: adminProcedure
+      .input(z.object({ 
+        limit: z.number().optional(), 
+        offset: z.number().optional(),
+        status: z.string().optional()
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getOrders(input?.limit || 100, input?.offset || 0, input?.status);
+      }),
+
+    // Admin: Get order details
+    getById: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getOrderById(input.id);
+      }),
+
+    // Admin: Confirm order and generate license
+    confirm: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await db.confirmOrder(input.id, ctx.user.id);
+        
+        // Send license key to customer via notification
+        await notifyOwner({
+          title: `Order Confirmed: ${result.order?.orderNumber}`,
+          content: `Order has been confirmed!\n\nLicense Key: ${result.license.licenseKey}\nCustomer Email: ${result.order?.customerEmail}\n\nPlease send the license key to the customer.`,
+        });
+
+        return result;
+      }),
+
+    // Admin: Cancel order
+    cancel: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.cancelOrder(input.id);
+        return { success: true };
+      }),
+
+    // Admin: Order statistics
+    stats: adminProcedure.query(async () => {
+      return db.getOrderStats();
+    }),
+  }),
+
+  // Subscriptions (Admin only)
+  subscriptions: router({
+    list: adminProcedure
+      .input(z.object({ 
+        limit: z.number().optional(), 
+        offset: z.number().optional(),
+        status: z.string().optional()
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getSubscriptions(input?.limit || 100, input?.offset || 0, input?.status);
+      }),
+
+    extend: adminProcedure
+      .input(z.object({ 
+        id: z.number(),
+        additionalDays: z.number().min(1)
+      }))
+      .mutation(async ({ input }) => {
+        await db.extendSubscription(input.id, input.additionalDays);
+        return { success: true };
+      }),
+
+    expire: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.expireSubscription(input.id);
+        return { success: true };
+      }),
+
+    checkExpired: adminProcedure.mutation(async () => {
+      const count = await db.checkAndExpireSubscriptions();
+      return { expiredCount: count };
     }),
   }),
 
@@ -146,7 +294,12 @@ export const appRouter = router({
   // Dashboard Stats (Admin only)
   dashboard: router({
     stats: adminProcedure.query(async () => {
-      return db.getDashboardStats();
+      const baseStats = await db.getDashboardStats();
+      const orderStats = await db.getOrderStats();
+      return {
+        ...baseStats,
+        orders: orderStats,
+      };
     }),
 
     downloadStats: adminProcedure.query(async () => {
@@ -155,6 +308,27 @@ export const appRouter = router({
 
     activeApps: adminProcedure.query(async () => {
       return db.getActiveApps();
+    }),
+  }),
+
+  // Settings (Admin only)
+  settings: router({
+    get: adminProcedure
+      .input(z.object({ key: z.string() }))
+      .query(async ({ input }) => {
+        return db.getSetting(input.key);
+      }),
+
+    set: adminProcedure
+      .input(z.object({ key: z.string(), value: z.string() }))
+      .mutation(async ({ input }) => {
+        await db.setSetting(input.key, input.value);
+        return { success: true };
+      }),
+
+    initPlans: adminProcedure.mutation(async () => {
+      await db.initializeDefaultPlans();
+      return { success: true };
     }),
   }),
 
