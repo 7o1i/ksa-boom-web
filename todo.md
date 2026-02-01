@@ -148,3 +148,4 @@
 ## Windows App Bug Fix
 - [x] Fix tkinter module not found error - rebuilt with web-based GUI (no tkinter needed)
 - [x] Fix 404 error in Windows app when validating license (fixed tRPC endpoint format)
+- [x] Debug and fix persistent 404 error in Windows app license validation (fixed tRPC batch format)
