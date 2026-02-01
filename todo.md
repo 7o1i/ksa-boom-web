@@ -137,3 +137,10 @@
 - [x] Add complete translations for Notifications/Orders page
 - [x] Add complete translations for Security page
 - [x] Ensure all UI text is translatable
+
+## Ready-to-Run Windows Application
+- [x] Set up Wine and Windows Python for cross-compilation
+- [x] Build Windows .exe using PyInstaller under Wine
+- [x] Create portable package with all dependencies (KSABoom-v1.0.0.zip)
+- [x] Upload compiled application to website public folder
+- [x] Update download page to serve the actual .exe file

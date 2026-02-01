@@ -54,9 +54,14 @@ export default function Download() {
   const handleDownload = async () => {
     trackDownloadMutation.mutate({ appVersion: "1.0.0" });
     toast.info(t('download.downloadStarting'));
-    // TODO: Replace with actual S3 download URL once .exe is uploaded
-    // For now, show instructions
-    toast.success(t('download.contactAdmin'));
+    // Download the actual application zip file
+    const link = document.createElement('a');
+    link.href = '/KSABoom-v1.0.0.zip';
+    link.download = 'KSABoom-v1.0.0.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(t('download.downloadStarted'));
   };
 
   const handleValidateLicense = async (e: React.FormEvent) => {
