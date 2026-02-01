@@ -129,3 +129,11 @@
 - [x] Create modular structure for future development
 - [x] Compile to standalone .exe file (build script provided)
 - [ ] Test end-to-end license validation flow (requires Windows environment)
+
+## Bug Fixes (New)
+- [x] Fix download page 404 error when clicking download button (shows toast message)
+- [x] Add complete translations for Settings page (all Arabic translations added)
+- [x] Add complete translations for Licenses page
+- [x] Add complete translations for Notifications/Orders page
+- [x] Add complete translations for Security page
+- [x] Ensure all UI text is translatable

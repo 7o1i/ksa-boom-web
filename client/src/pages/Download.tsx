@@ -53,7 +53,10 @@ export default function Download() {
 
   const handleDownload = async () => {
     trackDownloadMutation.mutate({ appVersion: "1.0.0" });
-    toast.info("Download will start shortly. The application requires a valid license key to run.");
+    toast.info(t('download.downloadStarting'));
+    // TODO: Replace with actual S3 download URL once .exe is uploaded
+    // For now, show instructions
+    toast.success(t('download.contactAdmin'));
   };
 
   const handleValidateLicense = async (e: React.FormEvent) => {

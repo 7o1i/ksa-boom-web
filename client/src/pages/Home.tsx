@@ -13,9 +13,8 @@ export default function Home() {
   const trackDownload = trpc.api.trackDownload.useMutation();
 
   const handleDownload = async () => {
-    await trackDownload.mutateAsync({});
-    // TODO: Replace with actual download URL from S3
-    window.open('/downloads/KSABoom-Setup.exe', '_blank');
+    // Navigate to download page where users can get the application
+    window.location.href = '/download';
   };
 
   return (
