@@ -144,3 +144,6 @@
 - [x] Create portable package with all dependencies (KSABoom-v1.0.0.zip)
 - [x] Upload compiled application to website public folder
 - [x] Update download page to serve the actual .exe file
+
+## Windows App Bug Fix
+- [x] Fix tkinter module not found error - rebuilt with web-based GUI (no tkinter needed)
