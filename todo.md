@@ -150,3 +150,4 @@
 - [x] Fix 404 error in Windows app when validating license (fixed tRPC endpoint format)
 - [x] Debug and fix persistent 404 error in Windows app license validation (fixed tRPC batch format)
 - [x] Create dedicated REST API endpoint for license validation (bypass tRPC complexity)
+- [x] PERMANENT FIX: Fixed Windows app API URL - was using placeholder URL instead of actual server URL

@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE license_keys SET currentActivations = 0, lastActivatedHwid = NULL WHERE licenseKey = 'LI316-1EFH2-GSRV0-DYDK3';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user grt6LNSoYSrgVpD.root --database hyw6dNpPfwvMbAQcNaKZ5T --execute UPDATE license_keys SET currentActivations = 0, lastActivatedHwid = NULL WHERE licenseKey = 'LI316-1EFH2-GSRV0-DYDK3';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1529
+}

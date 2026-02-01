@@ -1,0 +1,61 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'license_keys';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user grt6LNSoYSrgVpD.root --database hyw6dNpPfwvMbAQcNaKZ5T --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'license_keys';",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "licenseKey"
+    },
+    {
+      "COLUMN_NAME": "status"
+    },
+    {
+      "COLUMN_NAME": "assignedTo"
+    },
+    {
+      "COLUMN_NAME": "assignedEmail"
+    },
+    {
+      "COLUMN_NAME": "maxActivations"
+    },
+    {
+      "COLUMN_NAME": "currentActivations"
+    },
+    {
+      "COLUMN_NAME": "expiresAt"
+    },
+    {
+      "COLUMN_NAME": "lastActivatedAt"
+    },
+    {
+      "COLUMN_NAME": "lastActivatedIp"
+    },
+    {
+      "COLUMN_NAME": "lastActivatedHwid"
+    },
+    {
+      "COLUMN_NAME": "notes"
+    },
+    {
+      "COLUMN_NAME": "createdBy"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "planId"
+    },
+    {
+      "COLUMN_NAME": "issuedAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nlicenseKey\nstatus\nassignedTo\nassignedEmail\nmaxActivations\ncurrentActivations\nexpiresAt\nlastActivatedAt\nlastActivatedIp\nlastActivatedHwid\nnotes\ncreatedBy\ncreatedAt\nupdatedAt\nplanId\nissuedAt\n",
+  "stderr": "",
+  "execution_time_ms": 1542
+}
