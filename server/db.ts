@@ -650,6 +650,13 @@ export async function cancelOrder(orderId: number) {
   await db.update(orders).set({ status: "cancelled" }).where(eq(orders.id, orderId));
 }
 
+export async function updateOrderStripeSession(orderId: number, stripeSessionId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(orders).set({ stripeSessionId }).where(eq(orders.id, orderId));
+}
+
 export async function getOrderStats() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

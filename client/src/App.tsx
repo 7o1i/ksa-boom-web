@@ -13,6 +13,7 @@ import LicenseManagement from "./pages/admin/Licenses";
 import SecurityMonitor from "./pages/admin/Security";
 import AdminSettings from "./pages/admin/Settings";
 import AdminOrders from "./pages/admin/Orders";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/download" component={Download} />
+      <Route path="/payment/success" component={PaymentSuccess} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/licenses" component={LicenseManagement} />
       <Route path="/admin/orders" component={AdminOrders} />

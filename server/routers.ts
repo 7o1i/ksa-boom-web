@@ -6,6 +6,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { notifyOwner } from "./_core/notification";
+import { createCheckoutSession, getPaymentStatus } from "./stripe/checkout";
+import { isStripeConfigured } from "./stripe/stripe";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -542,6 +544,79 @@ export const appRouter = router({
       .input(z.object({ days: z.number().min(1).max(90).default(7) }).optional())
       .query(async ({ input }) => {
         return db.getLicensesExpiringWithin(input?.days || 7);
+      }),
+  }),
+
+  // Stripe Payment (Public)
+  stripe: router({
+    // Check if Stripe is configured
+    isConfigured: publicProcedure.query(() => {
+      return { configured: isStripeConfigured() };
+    }),
+
+    // Create checkout session for a plan
+    createCheckout: publicProcedure
+      .input(z.object({
+        planId: z.number(),
+        customerEmail: z.string().email(),
+        customerName: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!isStripeConfigured()) {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe is not configured' });
+        }
+
+        // Get plan details
+        const plan = await db.getSubscriptionPlanById(input.planId);
+        if (!plan) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Plan not found' });
+        }
+
+        // Create order first
+        const order = await db.createOrder({
+          customerEmail: input.customerEmail,
+          customerName: input.customerName,
+          planId: input.planId,
+          paymentMethod: 'stripe',
+        });
+
+        // Get origin for redirect URLs
+        const origin = ctx.req.headers.origin || `${ctx.req.protocol}://${ctx.req.get('host')}`;
+
+        // Create Stripe checkout session
+        const session = await createCheckoutSession({
+          planDuration: plan.duration,
+          customerEmail: input.customerEmail,
+          customerName: input.customerName,
+          userId: ctx.user?.id,
+          orderId: order.id,
+          successUrl: `${origin}/payment/success`,
+          cancelUrl: `${origin}/pricing`,
+        });
+
+        if (!session) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create checkout session' });
+        }
+
+        // Update order with Stripe session ID
+        await db.updateOrderStripeSession(order.id, session.sessionId);
+
+        return {
+          checkoutUrl: session.url,
+          sessionId: session.sessionId,
+          orderNumber: order.orderNumber,
+        };
+      }),
+
+    // Check payment status
+    checkPayment: publicProcedure
+      .input(z.object({ sessionId: z.string() }))
+      .query(async ({ input }) => {
+        const status = await getPaymentStatus(input.sessionId);
+        if (!status) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Session not found' });
+        }
+        return status;
       }),
   }),
 

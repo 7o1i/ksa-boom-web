@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Check, Zap, Crown, Rocket, ArrowLeft, Loader2 } from "lucide-react";
+import { Check, Zap, Crown, Rocket, ArrowLeft, Loader2, CreditCard } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -19,8 +19,12 @@ export default function Pricing() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [orderComplete, setOrderComplete] = useState<{ orderNumber: string; amount: number; currency: string } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'manual'>('stripe');
 
   const { data: plans, isLoading } = trpc.plans.list.useQuery();
+  const { data: stripeConfig } = trpc.stripe.isConfigured.useQuery();
+  
+  // Manual order creation
   const createOrderMutation = trpc.orders.create.useMutation({
     onSuccess: (data) => {
       setOrderComplete(data);
@@ -28,6 +32,21 @@ export default function Pricing() {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to place order");
+    },
+  });
+
+  // Stripe checkout
+  const createCheckoutMutation = trpc.stripe.createCheckout.useMutation({
+    onSuccess: (data) => {
+      toast.success("Redirecting to payment...");
+      // Open Stripe checkout in new tab
+      window.open(data.checkoutUrl, '_blank');
+      setIsDialogOpen(false);
+      setCustomerEmail("");
+      setCustomerName("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create checkout session");
     },
   });
 
@@ -40,11 +59,22 @@ export default function Pricing() {
     e.preventDefault();
     if (!selectedPlan || !customerEmail) return;
 
-    createOrderMutation.mutate({
-      planId: selectedPlan,
-      customerEmail,
-      customerName: customerName || undefined,
-    });
+    if (paymentMethod === 'stripe' && stripeConfig?.configured) {
+      // Use Stripe checkout
+      createCheckoutMutation.mutate({
+        planId: selectedPlan,
+        customerEmail,
+        customerName: customerName || undefined,
+      });
+    } else {
+      // Use manual order
+      createOrderMutation.mutate({
+        planId: selectedPlan,
+        customerEmail,
+        customerName: customerName || undefined,
+        paymentMethod: 'manual',
+      });
+    }
   };
 
   const getPlanIcon = (duration: string) => {
@@ -114,6 +144,8 @@ export default function Pricing() {
       default: return duration;
     }
   };
+
+  const isProcessing = createOrderMutation.isPending || createCheckoutMutation.isPending;
 
   return (
     <div className="min-h-screen bg-background cyber-grid">
@@ -219,7 +251,10 @@ export default function Pricing() {
             </CardHeader>
             <CardContent className="text-muted-foreground">
               <p className="mb-4">
-                {t('pricing.paymentDesc')}
+                {stripeConfig?.configured 
+                  ? "Secure payment powered by Stripe. You can also choose manual payment verification."
+                  : t('pricing.paymentDesc')
+                }
               </p>
               <p className="text-sm">
                 {t('pricing.contactEmail')} <span className="text-primary">hack1pro6@gmail.com</span>
@@ -274,7 +309,10 @@ export default function Pricing() {
               <DialogHeader>
                 <DialogTitle className="font-display">{t('pricing.placeOrder')}</DialogTitle>
                 <DialogDescription>
-                  {t('pricing.paymentDesc')}
+                  {stripeConfig?.configured 
+                    ? "Choose your payment method and complete your order."
+                    : t('pricing.paymentDesc')
+                  }
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmitOrder}>
@@ -299,16 +337,57 @@ export default function Pricing() {
                       onChange={(e) => setCustomerName(e.target.value)}
                     />
                   </div>
+                  
+                  {/* Payment Method Selection */}
+                  {stripeConfig?.configured && (
+                    <div className="grid gap-2">
+                      <Label>Payment Method</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          variant={paymentMethod === 'stripe' ? 'default' : 'outline'}
+                          className={paymentMethod === 'stripe' ? 'neon-glow-gold' : ''}
+                          onClick={() => setPaymentMethod('stripe')}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Card Payment
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={paymentMethod === 'manual' ? 'default' : 'outline'}
+                          className={paymentMethod === 'manual' ? 'neon-glow-gold' : ''}
+                          onClick={() => setPaymentMethod('manual')}
+                        >
+                          Manual Transfer
+                        </Button>
+                      </div>
+                      {paymentMethod === 'stripe' && (
+                        <p className="text-xs text-muted-foreground">
+                          Secure payment via Stripe. You'll be redirected to complete payment.
+                        </p>
+                      )}
+                      {paymentMethod === 'manual' && (
+                        <p className="text-xs text-muted-foreground">
+                          Contact us at hack1pro6@gmail.com to complete payment manually.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     {t('common.cancel')}
                   </Button>
-                  <Button type="submit" disabled={createOrderMutation.isPending || !customerEmail}>
-                    {createOrderMutation.isPending ? (
+                  <Button type="submit" disabled={isProcessing || !customerEmail}>
+                    {isProcessing ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         {t('pricing.processing')}
+                      </>
+                    ) : paymentMethod === 'stripe' && stripeConfig?.configured ? (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Pay with Card
                       </>
                     ) : (
                       t('pricing.placeOrder')

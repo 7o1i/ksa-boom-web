@@ -113,3 +113,19 @@
 - [x] Update API endpoint for Windows app license validation with expiration check
 - [x] Add maintenance endpoints for manual expiration and cleanup triggers
 - [x] Add translations for subscription plan features
+
+## Stripe Payment Integration
+- [x] Add Stripe feature to website
+- [x] Create Stripe checkout for subscription plans
+- [x] Handle payment webhooks for order confirmation
+- [x] Auto-generate license keys on successful payment
+
+## Windows .exe Application
+- [x] Create Python application with KSA,Boom branding
+- [x] Implement cyberpunk UI with gold/cyan colors
+- [x] Add license key validation screen
+- [x] Connect to website API for license verification
+- [x] Lock features until valid license entered
+- [x] Create modular structure for future development
+- [x] Compile to standalone .exe file (build script provided)
+- [ ] Test end-to-end license validation flow (requires Windows environment)

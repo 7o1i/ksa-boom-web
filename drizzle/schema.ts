@@ -190,6 +190,8 @@ export const orders = mysqlTable("orders", {
   status: mysqlEnum("status", ["pending", "confirmed", "cancelled", "refunded"]).default("pending").notNull(),
   paymentMethod: varchar("paymentMethod", { length: 64 }),
   paymentReference: varchar("paymentReference", { length: 255 }),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }), // Stripe checkout session ID
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }), // Stripe payment intent ID
   notes: text("notes"),
   confirmedBy: int("confirmedBy"),
   confirmedAt: timestamp("confirmedAt"),
